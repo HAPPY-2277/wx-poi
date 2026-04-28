@@ -1,0 +1,40 @@
+<view class="container">
+  <!-- 用户信息卡片 -->
+  <view class="user-card">
+    <!-- 头像区域：直径 120rpx（约60px） -->
+    <view class="avatar-container">
+      <image 
+        class="avatar" 
+        src="{{user.avatar || '/images/avatar.png'}}" 
+        mode="aspectFill"
+        binderror="onAvatarError"
+      />
+    </view>
+    
+    <!-- 昵称展示：最长10个字符 -->
+    <view class="nickname-container">
+      <text class="nickname">{{displayNickname}}</text>
+    </view>
+    
+    <!-- 角色信息 -->
+    <view class="role-badge" wx:if="{{user.role}}">
+      <text class="role-text">角色：{{user.role}}</text>
+    </view>
+  </view>
+
+  <!-- 功能区域 -->
+  <view class="action-area">
+    <view class="info-item">
+      <text class="info-label">注册时间</text>
+      <text class="info-value">{{user.createTime || '未知'}}</text>
+    </view>
+    
+    <view class="info-item">
+      <text class="info-label">用户状态</text>
+      <text class="info-value status-active">正常</text>
+    </view>
+  </view>
+
+  <!-- 退出登录按钮 -->
+  <button class="logout-btn" bindtap="handleLogout">退出登录</button>
+</view>

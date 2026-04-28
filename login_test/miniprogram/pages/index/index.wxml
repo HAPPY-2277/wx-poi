@@ -1,0 +1,5 @@
+<view class="container">
+  <button class="login-btn" bindtap="handleLogin">
+    微信登录
+  </button>
+</view>

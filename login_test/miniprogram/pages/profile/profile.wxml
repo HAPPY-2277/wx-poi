@@ -1,0 +1,14 @@
+<view class="container">
+  <!-- 昵称输入 -->
+  <input 
+    type="nickname"
+    class="input"
+    placeholder="请输入昵称"
+    bindinput="onInput"
+  />
+
+  <!-- 提交 -->
+  <button class="submit-btn" bindtap="handleSubmit">
+    完成
+  </button>
+</view>
