@@ -1,43 +1,174 @@
+/* 页面容器 */
 .container {
-  height: 100vh;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, #f8fafc 0%, #e8f5e9 100%);
+  padding: 0 40rpx;
+}
+
+/* Logo区域 */
+.logo-section {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  background-color: #f5f5f5;
+  padding-top: 120rpx;
+  margin-bottom: 60rpx;
 }
 
-.title {
+.logo-icon {
+  font-size: 120rpx;
+  margin-bottom: 30rpx;
+}
+
+.app-name {
+  font-size: 52rpx;
+  font-weight: bold;
+  color: #1a1a1a;
+  margin-bottom: 16rpx;
+  letter-spacing: 4rpx;
+}
+
+.app-desc {
+  font-size: 28rpx;
+  color: #666;
+  letter-spacing: 2rpx;
+}
+
+/* 用户信息区域 */
+.user-section {
+  margin-bottom: 40rpx;
+}
+
+.user-card {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 40rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 8rpx 32rpx rgba(7, 193, 96, 0.1);
+}
+
+.user-avatar {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 50%;
+  margin-bottom: 24rpx;
+  border: 4rpx solid #07c160;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.user-name {
   font-size: 36rpx;
   font-weight: bold;
+  color: #333;
+  margin-bottom: 8rpx;
+}
+
+.user-role {
+  font-size: 26rpx;
+  color: #07c160;
+  padding: 8rpx 24rpx;
+  background: #f0f9f0;
+  border-radius: 20rpx;
+}
+
+/* 登录区域 */
+.login-section {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 80rpx;
+}
+
+.login-card {
+  width: 100%;
+  background: #fff;
+  border-radius: 32rpx;
+  padding: 60rpx 40rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.08);
+}
+
+.login-title {
+  display: block;
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #333;
+  text-align: center;
+  margin-bottom: 16rpx;
+}
+
+.login-desc {
+  display: block;
+  font-size: 28rpx;
+  color: #999;
+  text-align: center;
   margin-bottom: 60rpx;
 }
 
 .login-btn {
-  width: 300rpx;
-  height: 80rpx;
-  background-color: #07c160;
-  color: white;
-  border-radius: 12rpx;
-  font-size: 30rpx;
+  width: 100%;
+  height: 96rpx;
+  background: linear-gradient(135deg, #07c160 0%, #06ad56 100%);
+  border-radius: 48rpx;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 8rpx 24rpx rgba(7, 193, 96, 0.3);
+  margin-bottom: 30rpx;
 }
 
-.user-card {
+.btn-icon {
+  font-size: 40rpx;
+  margin-right: 12rpx;
+}
+
+.btn-text {
+  font-size: 32rpx;
+  color: #fff;
+  font-weight: bold;
+}
+
+.login-btn::after {
+  border: none;
+}
+
+.login-btn:active {
+  transform: scale(0.98);
+  opacity: 0.9;
+}
+
+.login-tip {
+  display: block;
+  font-size: 24rpx;
+  color: #999;
+  text-align: center;
+  margin-top: 20rpx;
+}
+
+/* 底部信息 */
+.footer {
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 40rpx 0;
+  margin-top: auto;
 }
 
-.avatar {
-  width: 120rpx;
-  height: 120rpx;
-  border-radius: 50%;
-  margin-bottom: 20rpx;
+.footer-text {
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 8rpx;
 }
 
-.nickname {
-  font-size: 30rpx;
+.version {
+  font-size: 22rpx;
+  color: #ccc;
 }

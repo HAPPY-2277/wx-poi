@@ -1,0 +1,113 @@
+<!-- 任务列表页面 -->
+<view class="container">
+
+  <!-- 筛选标签栏 -->
+  <view class="filter-bar" style="width: 518rpx; height: 141rpx; display: flex; box-sizing: border-box; left: NaNrpx; top: 0rpx">
+    <view
+      class="filter-item {{filterStatus === 'all' ? 'active' : ''}}"
+      bindtap="onFilterChange"
+      data-status="all"
+    >
+      全部
+    </view>
+    <view
+      class="filter-item {{filterStatus === 'pending' ? 'active' : ''}}"
+      bindtap="onFilterChange"
+      data-status="pending"
+    >
+      待采集
+    </view>
+    <view
+      class="filter-item {{filterStatus === 'in_progress' ? 'active' : ''}}"
+      bindtap="onFilterChange"
+      data-status="in_progress"
+    >
+      采集中
+    </view>
+    <view
+      class="filter-item {{filterStatus === 'completed' ? 'active' : ''}}"
+      bindtap="onFilterChange"
+      data-status="completed"
+    >
+      已完成
+    </view>
+  </view>
+
+  <!-- 任务列表 -->
+  <view class="task-list">
+
+    <!-- 任务项 -->
+    <view
+      class="task-item"
+      wx:for="{{taskList}}"
+      wx:key="id"
+      bindtap="onTaskTap"
+      data-id="{{item.id}}"
+    >
+      <!-- 任务状态标签 -->
+      <view class="task-status" style="background-color: {{getStatusInfo(item.status).color}}">
+        {{getStatusInfo(item.status).label}}
+      </view>
+
+      <!-- 任务内容 -->
+      <view class="task-content">
+        <view class="task-header">
+          <!-- 任务类型 -->
+          <text class="task-type">{{item.type === 'new' ? '新POI采集' : 'POI更新'}}</text>
+          <!-- 发布时间 -->
+          <text class="task-time">{{formatTime(item.createTime)}}</text>
+        </view>
+
+        <!-- 任务描述 -->
+        <view class="task-desc">
+          <text wx:if="{{item.address}}">{{item.address}}</text>
+          <text wx:else>未提供地址信息</text>
+        </view>
+
+        <!-- 重新采集原因 -->
+        <view class="task-reason" wx:if="{{item.reason && item.status === 'pending'}}">
+          <text class="reason-label">重新采集原因：</text>
+          <text class="reason-text">{{item.reason}}</text>
+        </view>
+
+        <!-- 任务底部信息 -->
+        <view class="task-footer">
+          <!-- 优先级 -->
+          <view class="task-priority" wx:if="{{item.priority}}">
+            <text class="priority-label">优先级：</text>
+            <text class="priority-value {{item.priority === 'high' ? 'high' : ''}}">
+              {{item.priority === 'high' ? '高' : item.priority === 'medium' ? '中' : '低'}}
+            </text>
+          </view>
+
+          <!-- 截止时间 -->
+          <view class="task-deadline" wx:if="{{item.deadline}}">
+            <text>截止：{{formatTime(item.deadline)}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 箭头指示 -->
+      <view class="task-arrow">›</view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{!loading && taskList.length === 0}}">
+      <image class="empty-icon" src="/images/icons/empty.png" mode="aspectFit"></image>
+      <text class="empty-text">暂无任务</text>
+      <text class="empty-tip">当前筛选条件下没有待采集的任务</text>
+    </view>
+
+    <!-- 加载更多 -->
+    <view class="loading-more" wx:if="{{loading && taskList.length > 0}}">
+      <text>加载中...</text>
+    </view>
+
+    <!-- 没有更多数据 -->
+    <view class="no-more" wx:if="{{!hasMore && taskList.length > 0}}">
+      <text>没有更多了</text>
+    </view>
+
+  </view>
+
+</view>

@@ -1,17 +1,59 @@
 {
   "pages": [
     "pages/index/index",
-    "pages/example/index",
+    "pages/profile/profile",
+    "pages/collector/index/index",
+    "pages/collector/collect/index",
+    "pages/collector/task-list/index",
+    "pages/collector/my-poi/index",
+    "pages/verifier/index/index",
+    "pages/verifier/verify-list/index",
+    "pages/verifier/verify-detail/index",
+    "pages/verifier/my-review/index",
+    "pages/map/map",
     "pages/home/home",
-    "pages/profile/profile"
+    "pages/example/index"
   ],
   "window": {
     "backgroundColor": "#F6F6F6",
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#F6F6F6",
-    "navigationBarTitleText": "云开发 QuickStart",
+    "navigationBarTitleText": "POI采集核验",
     "navigationBarTextStyle": "black"
   },
+  "tabBar": {
+    "custom": true,
+    "color": "#999999",
+    "selectedColor": "#07c160",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "登录"
+      },
+      {
+        "pagePath": "pages/collector/index/index",
+        "text": "采集"
+      },
+      {
+        "pagePath": "pages/verifier/index/index",
+        "text": "核验"
+      },
+      {
+        "pagePath": "pages/map/map",
+        "text": "地图"
+      }
+    ]
+  },
+  "permission": {
+    "scope.userLocation": {
+      "desc": "你的位置信息将用于POI定位和导航"
+    }
+  },
+  "requiredPrivateInfos": [
+    "getLocation"
+  ],
   "sitemapLocation": "sitemap.json",
   "style": "v2",
   "lazyCodeLoading": "requiredComponents"

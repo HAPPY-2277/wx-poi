@@ -1,0 +1,214 @@
+/* 核验者首页样式 */
+
+/* 页面容器 */
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #f6f6f6;
+  padding: 20rpx;
+}
+
+/* 角色头部信息 */
+.role-header {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+}
+
+.avatar-wrapper {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 60rpx;
+  overflow: hidden;
+  margin-right: 24rpx;
+}
+
+.avatar {
+  width: 100%;
+  height: 100%;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.nickname {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8rpx;
+}
+
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  background: #409eff;
+  padding: 6rpx 16rpx;
+  border-radius: 20rpx;
+}
+
+.role-text {
+  font-size: 24rpx;
+  color: #fff;
+}
+
+/* 统计区域 */
+.statistics-section {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 24rpx;
+}
+
+.statistics-cards {
+  display: flex;
+  justify-content: space-between;
+}
+
+.stat-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20rpx;
+}
+
+.stat-icon {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 40rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16rpx;
+}
+
+.pending-icon {
+  background: #fef0f0;
+}
+
+.pending-icon .icon-text {
+  color: #f56c6c;
+  font-size: 36rpx;
+  font-weight: bold;
+}
+
+.today-icon {
+  background: #f0f9ff;
+}
+
+.today-icon .icon-text {
+  color: #409eff;
+  font-size: 36rpx;
+  font-weight: bold;
+}
+
+.rate-icon {
+  background: #f0fdf4;
+}
+
+.rate-icon .icon-text {
+  color: #67c23a;
+  font-size: 36rpx;
+  font-weight: bold;
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stat-value {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8rpx;
+}
+
+.stat-label {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 功能入口区域 */
+.function-section {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+}
+
+.function-entries {
+  display: flex;
+  flex-direction: column;
+}
+
+.function-card {
+  display: flex;
+  align-items: center;
+  padding: 30rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.function-card:last-child {
+  border-bottom: none;
+}
+
+.card-icon {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 16rpx;
+  background: #f0f7ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 24rpx;
+}
+
+.card-icon image {
+  width: 48rpx;
+  height: 48rpx;
+}
+
+.card-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8rpx;
+}
+
+.card-description {
+  font-size: 26rpx;
+  color: #999;
+}
+
+.card-arrow {
+  margin-left: 16rpx;
+}
+
+.arrow-icon {
+  font-size: 48rpx;
+  color: #ccc;
+  font-weight: bold;
+}

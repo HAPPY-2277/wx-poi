@@ -1,0 +1,242 @@
+/* 核验详情页样式 */
+
+/* 页面容器 */
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #f6f6f6;
+}
+
+/* 图片轮播区域 */
+.image-section {
+  position: relative;
+  width: 100%;
+  height: 500rpx;
+  background: #000;
+}
+
+.image-swiper {
+  width: 100%;
+  height: 100%;
+}
+
+.swiper-image {
+  width: 100%;
+  height: 100%;
+}
+
+.image-indicator {
+  position: absolute;
+  bottom: 20rpx;
+  right: 20rpx;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 8rpx 20rpx;
+  border-radius: 20rpx;
+}
+
+.indicator-text {
+  font-size: 24rpx;
+  color: #fff;
+}
+
+/* POI 信息区域 */
+.info-section {
+  flex: 1;
+  padding: 20rpx;
+}
+
+/* 信息卡片 */
+.info-card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+}
+
+.card-header {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 24rpx;
+}
+
+.poi-name {
+  flex: 1;
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #333;
+  margin-right: 16rpx;
+}
+
+.category-tag {
+  background: #f0f7ff;
+  padding: 6rpx 16rpx;
+  border-radius: 16rpx;
+  flex-shrink: 0;
+}
+
+.category-text {
+  font-size: 24rpx;
+  color: #409eff;
+}
+
+.info-row {
+  display: flex;
+  margin-bottom: 16rpx;
+}
+
+.info-row:last-child {
+  margin-bottom: 0;
+}
+
+.info-label {
+  width: 120rpx;
+  font-size: 28rpx;
+  color: #999;
+  flex-shrink: 0;
+}
+
+.info-value {
+  flex: 1;
+  font-size: 28rpx;
+  color: #333;
+  line-height: 1.5;
+}
+
+.info-value.description {
+  color: #666;
+  margin-top: 8rpx;
+}
+
+/* 地图按钮 */
+.map-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f7ff;
+  padding: 16rpx;
+  border-radius: 12rpx;
+  margin-top: 20rpx;
+}
+
+.map-button-text {
+  font-size: 28rpx;
+  color: #409eff;
+}
+
+/* 审核操作区域 */
+.action-section {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 24rpx;
+}
+
+/* 操作选项 */
+.action-options {
+  display: flex;
+  gap: 20rpx;
+  margin-bottom: 24rpx;
+}
+
+.action-option {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30rpx 20rpx;
+  background: #fafafa;
+  border-radius: 12rpx;
+  border: 2rpx solid transparent;
+}
+
+.action-icon {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12rpx;
+}
+
+.action-icon-text {
+  font-size: 40rpx;
+  color: #fff;
+  font-weight: bold;
+}
+
+.action-label {
+  font-size: 28rpx;
+  font-weight: 500;
+}
+
+/* 拒绝原因输入 */
+.error-description-wrapper {
+  margin-bottom: 24rpx;
+}
+
+.input-label {
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 12rpx;
+}
+
+.error-input {
+  width: 100%;
+  min-height: 200rpx;
+  background: #fafafa;
+  border: 2rpx solid #e0e0e0;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  font-size: 28rpx;
+  color: #333;
+  box-sizing: border-box;
+  line-height: 1.5;
+}
+
+.error-input:focus {
+  border-color: #409eff;
+}
+
+.input-hint {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8rpx;
+}
+
+.hint-text {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 提交按钮 */
+.submit-button {
+  width: 100%;
+  height: 88rpx;
+  background: #409eff;
+  border-radius: 44rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+}
+
+.submit-button[disabled] {
+  background: #c0c4cc;
+  color: #fff;
+}
+
+.submit-button-text {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #fff;
+}

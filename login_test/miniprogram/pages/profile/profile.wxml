@@ -1,14 +1,69 @@
 <view class="container">
-  <!-- 昵称输入 -->
-  <input 
-    type="nickname"
-    class="input"
-    placeholder="请输入昵称"
-    bindinput="onInput"
-  />
+  <view class="header">
+    <text class="title">注册新用户</text>
+    <text class="subtitle">请完善以下信息完成注册</text>
+  </view>
 
-  <!-- 提交 -->
+  <view class="form">
+    <!-- 昵称输入 -->
+    <view class="form-item">
+      <text class="label">昵称</text>
+      <input 
+        type="nickname"
+        class="input"
+        placeholder="请输入昵称"
+        value="{{nickname}}"
+        bindinput="onInput"
+      />
+    </view>
+
+    <!-- 身份选择 -->
+    <view class="form-item">
+      <text class="label">身份</text>
+      <view class="role-picker" bindtap="toggleRolePicker">
+        <text class="{{role ? 'value' : 'placeholder'}}">{{role === 'collector' ? '采集者' : role === 'verifier' ? '核验者' : '请选择您的身份'}}</text>
+        <text class="arrow">▼</text>
+      </view>
+    </view>
+
+    <!-- 身份说明 -->
+    <view class="role-desc" wx:if="{{role}}">
+      <text class="desc-text">{{role === 'collector' ? '负责实地采集POI信息，包括拍照、定位、信息录入' : '负责审核采集者提交的POI数据，标记错误，与采集者沟通'}}</text>
+    </view>
+  </view>
+
+  <!-- 提交按钮 -->
   <button class="submit-btn" bindtap="handleSubmit">
-    完成
+    完成注册
   </button>
+
+  <!-- 身份选择弹窗 -->
+  <view class="picker-mask" wx:if="{{showRolePicker}}" bindtap="toggleRolePicker">
+    <view class="picker-content" catchtap="preventBubble">
+      <view class="picker-header">
+        <text class="picker-title">选择您的身份</text>
+      </view>
+      <view class="picker-body">
+        <view 
+          class="picker-item {{role === item.value ? 'selected' : ''}}" 
+          wx:for="{{roles}}" 
+          wx:key="value"
+          bindtap="onSelectRole"
+          data-role="{{item.value}}"
+        >
+          <view class="item-icon">
+            <text class="icon-text">{{item.value === 'collector' ? '📍' : '📝'}}</text>
+          </view>
+          <view class="item-info">
+            <text class="item-label">{{item.label}}</text>
+            <text class="item-desc">{{item.desc}}</text>
+          </view>
+          <view class="item-check" wx:if="{{role === item.value}}">✓</view>
+        </view>
+      </view>
+      <view class="picker-footer">
+        <button class="cancel-btn" bindtap="toggleRolePicker">取消</button>
+      </view>
+    </view>
+  </view>
 </view>

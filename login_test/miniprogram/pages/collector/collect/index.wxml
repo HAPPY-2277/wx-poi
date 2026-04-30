@@ -1,0 +1,151 @@
+<!-- 采集表单页面 -->
+<view class="container">
+
+  <!-- 表单区域 -->
+  <view class="form-container">
+
+    <!-- POI名称 -->
+    <view class="form-item {{errors.name ? 'error' : ''}}">
+      <view class="form-label">POI名称 <text class="required">*</text></view>
+      <input
+        class="form-input"
+        placeholder="请输入POI名称"
+        value="{{formData.name}}"
+        bindinput="onNameInput"
+        maxlength="100"
+      />
+      <view class="error-tip" wx:if="{{errors.name}}">{{errors.name}}</view>
+    </view>
+
+    <!-- 分类选择 -->
+    <view class="form-item {{errors.category ? 'error' : ''}}" bindtap="showPicker">
+      <view class="form-label">分类 <text class="required">*</text></view>
+      <view class="form-value {{selectedCategory ? '' : 'placeholder'}}">
+        {{selectedCategory ? selectedCategory.name : '请选择POI分类'}}
+        <text class="arrow">›</text>
+      </view>
+      <view class="error-tip" wx:if="{{errors.category}}">{{errors.category}}</view>
+    </view>
+
+    <!-- 地址 -->
+    <view class="form-item {{errors.address ? 'error' : ''}}">
+      <view class="form-label">详细地址 <text class="required">*</text></view>
+      <input
+        class="form-input"
+        placeholder="请输入详细地址"
+        value="{{formData.address}}"
+        bindinput="onAddressInput"
+        maxlength="200"
+      />
+      <view class="error-tip" wx:if="{{errors.address}}">{{errors.address}}</view>
+    </view>
+
+    <!-- GPS位置 -->
+    <view class="form-item {{errors.location ? 'error' : ''}}">
+      <view class="form-label">GPS位置 <text class="required">*</text></view>
+      <view class="location-container">
+        <view class="location-info">
+          <text wx:if="{{formData.latitude && formData.longitude}}" class="location-text">
+            纬度: {{formData.latitude}}, 经度: {{formData.longitude}}
+          </text>
+          <text wx:else class="location-placeholder">请获取GPS位置</text>
+        </view>
+        <button
+          class="location-btn"
+          bindtap="getLocation"
+          loading="{{gettingLocation}}"
+          disabled="{{gettingLocation}}"
+        >
+          {{gettingLocation ? '定位中...' : '获取位置'}}
+        </button>
+      </view>
+      <view class="error-tip" wx:if="{{errors.location}}">{{errors.location}}</view>
+    </view>
+
+    <!-- 图片上传 -->
+    <view class="form-item {{errors.photos ? 'error' : ''}}">
+      <view class="form-label">图片 <text class="required">*</text></view>
+      <view class="photo-container">
+        <!-- 已上传的图片 -->
+        <view class="photo-item" wx:for="{{photoList}}" wx:key="index">
+          <image src="{{item}}" mode="aspectFill" bindtap="previewImage" data-index="{{index}}"></image>
+          <view class="delete-btn" bindtap="deleteImage" data-index="{{index}}">×</view>
+        </view>
+        <!-- 添加按钮 -->
+        <view class="add-photo" bindtap="chooseImage" wx:if="{{photoList.length < maxPhotoCount}}">
+          <text class="add-icon">+</text>
+          <text class="add-text">添加图片</text>
+        </view>
+      </view>
+      <view class="photo-tip">
+        <text>已上传 {{photoList.length}}/{{maxPhotoCount}} 张图片</text>
+      </view>
+      <view class="error-tip" wx:if="{{errors.photos}}">{{errors.photos}}</view>
+    </view>
+
+    <!-- 描述 -->
+    <view class="form-item">
+      <view class="form-label">描述说明</view>
+      <textarea
+        class="form-textarea"
+        placeholder="请输入POI的详细描述（选填）"
+        value="{{formData.description}}"
+        bindinput="onDescriptionInput"
+        maxlength="500"
+      />
+    </view>
+
+    <!-- 电话 -->
+    <view class="form-item">
+      <view class="form-label">联系电话</view>
+      <input
+        class="form-input"
+        type="number"
+        placeholder="请输入联系电话（选填）"
+        value="{{formData.phone}}"
+        bindinput="onPhoneInput"
+        maxlength="20"
+      />
+    </view>
+
+    <!-- 营业时间 -->
+    
+
+  </view>
+
+  <!-- 提交按钮 -->
+  <view class="submit-container">
+    <button
+      class="submit-btn"
+      bindtap="submitForm"
+      loading="{{submitting}}"
+      disabled="{{submitting}}"
+    >
+      {{submitting ? '提交中...' : '提交采集'}}
+    </button>
+  </view>
+
+  <!-- 分类选择器 -->
+  <view class="picker-mask {{showCategoryPicker ? 'show' : ''}}" bindtap="hidePicker">
+    <view class="picker-content {{showCategoryPicker ? 'show' : ''}}" catchtap="preventBubble">
+      <view class="picker-header">
+        <text class="picker-title">选择POI分类</text>
+        <text class="picker-close" bindtap="hidePicker">×</text>
+      </view>
+      <view class="picker-body">
+        <view
+          class="category-item"
+          wx:for="{{categories}}"
+          wx:key="id"
+          bindtap="onSelectCategory"
+          data-id="{{item.id}}"
+        >
+          <text class="category-icon">{{item.icon}}</text>
+          <text class="category-name">{{item.name}}</text>
+          <text class="category-check" wx:if="{{formData.category === item.id}}">✓</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+</view>

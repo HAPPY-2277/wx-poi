@@ -1,0 +1,39 @@
+<view class="tab-bar">
+  <view class="tab-content">
+    <view 
+      class="tab-item {{selected === 0 ? 'active' : ''}}" 
+      data-index="0"
+      bindtap="switchTab"
+    >
+      <text class="tab-icon">{{selected === 0 ? '👤' : '👤'}}</text>
+      <text class="tab-text">登录</text>
+    </view>
+    
+    <view 
+      class="tab-item {{selected === 1 ? 'active' : ''}}" 
+      data-index="1"
+      bindtap="switchTab"
+    >
+      <text class="tab-icon">📍</text>
+      <text class="tab-text">采集</text>
+    </view>
+    
+    <view 
+      class="tab-item {{selected === 2 ? 'active' : ''}}" 
+      data-index="2"
+      bindtap="switchTab"
+    >
+      <text class="tab-icon">📝</text>
+      <text class="tab-text">核验</text>
+    </view>
+    
+    <view 
+      class="tab-item {{selected === 3 ? 'active' : ''}}" 
+      data-index="3"
+      bindtap="switchTab"
+    >
+      <text class="tab-icon">🗺️</text>
+      <text class="tab-text">地图</text>
+    </view>
+  </view>
+</view>

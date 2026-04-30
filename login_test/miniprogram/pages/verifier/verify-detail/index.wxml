@@ -1,0 +1,119 @@
+<!-- 核验详情页 -->
+<!-- 功能：展示POI详细信息，支持审核操作 -->
+<view class="container">
+
+  <!-- 图片轮播区域 -->
+  <view class="image-section">
+    <swiper
+      class="image-swiper"
+      indicator-dots="true"
+      indicator-color="rgba(255, 255, 255, 0.5)"
+      indicator-active-color="#fff"
+      autoplay="false"
+      circular="true"
+      bindchange="onImageSwiperChange"
+    >
+      <block wx:for="{{imageUrls}}" wx:key="index">
+        <swiper-item>
+          <image
+            class="swiper-image"
+            src="{{item}}"
+            mode="aspectFill"
+            data-index="{{index}}"
+            bindtap="onImagePreview"
+          />
+        </swiper-item>
+      </block>
+    </swiper>
+
+    <!-- 图片指示器 -->
+    <view class="image-indicator">
+      <text class="indicator-text">{{currentImageIndex + 1}} / {{imageUrls.length}}</text>
+    </view>
+  </view>
+
+  <!-- POI 信息区域 -->
+  <view class="info-section">
+    <!-- 基本信息卡片 -->
+    <view class="info-card">
+      <view class="card-header">
+        <text class="poi-name">{{poiDetail.name}}</text>
+        <view class="category-tag">
+          <text class="category-text">{{poiDetail.categoryName}}</text>
+        </view>
+      </view>
+
+      <view class="info-row">
+        <text class="info-label">地址</text>
+        <text class="info-value">{{poiDetail.address || '暂无'}}</text>
+      </view>
+
+      <view class="info-row">
+        <text class="info-label">提交人</text>
+        <text class="info-value">{{poiDetail.submitter || '未知'}}</text>
+      </view>
+
+      <view class="info-row">
+        <text class="info-label">提交时间</text>
+        <text class="info-value">{{poiDetail.submitTime || '未知'}}</text>
+      </view>
+
+      <view class="info-row" wx:if="{{poiDetail.description}}">
+        <text class="info-label">描述</text>
+        <text class="info-value description">{{poiDetail.description}}</text>
+      </view>
+
+      <!-- 地图按钮 -->
+      <view class="map-button" bindtap="onViewMap" wx:if="{{poiDetail.location && poiDetail.location.latitude}}">
+        <text class="map-button-text">查看位置</text>
+      </view>
+    </view>
+
+    <!-- 审核操作区域 -->
+    <view class="action-section">
+      <view class="section-title">审核操作</view>
+
+      <!-- 操作选项 -->
+      <view class="action-options">
+        <block wx:for="{{actionOptions}}" wx:key="id">
+          <view
+            class="action-option {{selectedAction === item.id ? 'active' : ''}}"
+            style="border-color: {{selectedAction === item.id ? item.color : 'transparent'}};"
+            data-action="{{item.id}}"
+            bindtap="onActionSelect"
+          >
+            <view class="action-icon" style="background-color: {{item.color}};">
+              <text class="action-icon-text">{{item.icon}}</text>
+            </view>
+            <text class="action-label" style="color: {{selectedAction === item.id ? item.color : '#666'}}; width: 100rpx; display: block; box-sizing: border-box; height: 41rpx; text-align:   center">{{item.label}}</text>
+          </view>
+        </block>
+      </view>
+
+      <!-- 拒绝原因输入（仅在拒绝时显示） -->
+      <view class="error-description-wrapper" wx:if="{{showErrorDescription}}">
+        <view class="input-label">拒绝原因</view>
+        <textarea
+          class="error-input"
+          placeholder="请输入拒绝原因..."
+          value="{{errorDescription}}"
+          bindinput="onErrorDescriptionInput"
+          maxlength="500"
+        />
+        <view class="input-hint">
+          <text class="hint-text">{{errorDescription.length}} / 500</text>
+        </view>
+      </view>
+
+      <!-- 提交按钮 -->
+      <button
+        class="submit-button"
+        bindtap="submitVerification"
+        disabled="{{!selectedAction || isSubmitting}}"
+      >
+        <text class="submit-button-text">{{isSubmitting ? '提交中...' : '提交审核结果'}}</text>
+      </button>
+    </view>
+  </view>
+
+</view>

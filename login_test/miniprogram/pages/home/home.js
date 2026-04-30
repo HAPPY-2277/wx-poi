@@ -43,12 +43,12 @@ Page({
       success: (resp) => {
         const { success, message, data } = resp.data;
 
-        // 根据 API 文档：以 success 字段作为主要判断依据
         if (success && data) {
-          // 兼容 data 直接为用户对象 或 data.userInfo 包装的情况
           const userInfo = data.userInfo || data;
           const nickname = userInfo.nickname || '未设置昵称';
           const displayNickname = this.truncateNickname(nickname, 10);
+
+          wx.setStorageSync('userNickname', nickname);
 
           this.setData({
             user: userInfo,
@@ -82,6 +82,12 @@ Page({
     });
   },
 
+  handleGoToMap() {
+    wx.navigateTo({
+      url: '/pages/map/map'
+    });
+  },
+
   handleLogout() {
     wx.showModal({
       title: '确认退出',
@@ -89,6 +95,7 @@ Page({
       success: (res) => {
         if (res.confirm) {
           wx.removeStorageSync('loginToken');
+          wx.removeStorageSync('userNickname');
           wx.showToast({
             title: '已退出登录',
             icon: 'success'

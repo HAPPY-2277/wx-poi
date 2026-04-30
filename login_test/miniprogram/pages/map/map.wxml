@@ -1,0 +1,39 @@
+<view class="container">
+  <!-- 左上角用户昵称显示 -->
+  <view class="user-info">
+    <text class="user-name">{{userNickname}}</text>
+  </view>
+
+  <!-- 地图容器 -->
+  <map
+    id="myMap"
+    class="map"
+    markers="{{markers}}"
+    latitude="{{latitude}}"
+    longitude="{{longitude}}"
+    scale="{{scale}}"
+    show-location
+    bindmarkertap="onMarkerTap"
+    bindregionchange="onRegionChange"
+  ></map>
+
+  <!-- 搜索区域 -->
+  <view class="search-bar">
+    <form bindsubmit="onSearch">
+      <view class="search-box">
+        <input 
+          class="search-input" 
+          name="keyword" 
+          placeholder="搜索周边地点"
+          value="{{keyword}}"
+        />
+        <button class="search-btn" form-type="submit">搜索</button>
+      </view>
+    </form>
+  </view>
+
+  <!-- 定位按钮 -->
+  <view class="location-btn" bindtap="getCurrentLocation">
+    <text class="location-text">定位</text>
+  </view>
+</view>

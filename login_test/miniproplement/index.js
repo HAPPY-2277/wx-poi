@@ -17,7 +17,7 @@ Page({
 
   checkLoginStatus() {
     const loginToken = wx.getStorageSync('loginToken');
-    const nickname = wx.getStorageSync('userNickname');
+    const nickname = wx.getStorageSync('nickname');
     const userRole = wx.getStorageSync('userRole');
     const avatar = wx.getStorageSync('avatar') || '/images/avatar.png';
     
@@ -55,18 +55,21 @@ Page({
       url: API.AUTH.LOGIN,
       method: 'POST',
       data: { code: code },
-      success: (res) => {
+      success: (resp) => {
         wx.hideLoading();
-        const { success, message, data } = res.data;
+        const { success, message, data } = resp.data;
 
         if (success && data) {
           wx.setStorageSync('loginToken', data.loginToken);
           
           if (data.nickname) {
-            wx.setStorageSync('userNickname', data.nickname);
+            wx.setStorageSync('nickname', data.nickname);
           }
           if (data.role) {
             wx.setStorageSync('userRole', data.role);
+          }
+          if (data.avatar) {
+            wx.setStorageSync('avatar', data.avatar);
           }
 
           if (data.isNewUser) {
@@ -85,14 +88,13 @@ Page({
             });
             
             wx.showToast({ title: message || '登录成功', icon: 'success' });
-            
             setTimeout(() => {
               if (data.role === 'collector') {
-                wx.switchTab({ url: '/pages/collector/index/index' });
+                wx.switchTab({ url: '/pages/collector/index' });
               } else if (data.role === 'verifier') {
-                wx.switchTab({ url: '/pages/verifier/index/index' });
+                wx.switchTab({ url: '/pages/verifier/index' });
               } else {
-                wx.switchTab({ url: '/pages/map/map' });
+                wx.switchTab({ url: '/pages/map' });
               }
             }, 1500);
           }
