@@ -12,7 +12,7 @@
   <!-- 已登录的采集者内容 -->
   <block wx:else>
   <!-- 角色头部信息 -->
-  <view class="header" style="position: relative; left: 4rpx; top: 0rpx; width: 393rpx; height: 237rpx; display: block; box-sizing: border-box">
+  <view class="header" style="position: relative; left: -10rpx; top: 0rpx; width: 352rpx; height: 237rpx; display: block; box-sizing: border-box">
     <view class="user-info">
       <!-- 用户头像 -->
       <image class="avatar" src="{{userInfo.avatar}}" mode="aspectFill"></image>
@@ -25,8 +25,8 @@
   </view>
 
   <!-- 统计数据区域 -->
-  <view class="stats-container">
-    <view class="stats-card" style="width: 495rpx; height: 233rpx; display: flex; box-sizing: border-box">
+  <view class="stats-container" style="width: 577rpx; height: 237rpx; display: block; box-sizing: border-box">
+    <view class="stats-card" style="width: 495rpx; height: 208rpx; display: flex; box-sizing: border-box">
       <!-- 新任务数 -->
       <view class="stat-item">
         <view class="stat-value">{{stats.newTasks}}</view>

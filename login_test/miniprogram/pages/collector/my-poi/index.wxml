@@ -1,5 +1,5 @@
 <view class="container">
-  <view class="stats-bar">
+  <view class="stats-bar" style="width: 514rpx; height: 143rpx; display: flex; box-sizing: border-box">
     <view class="stat-item">
       <text class="stat-value">{{stats.total}}</text>
       <text class="stat-label">总计</text>
@@ -21,7 +21,7 @@
     </view>
   </view>
 
-  <view class="filter-bar">
+  <view class="filter-bar" style="width: 552rpx; height: 97rpx; display: flex; box-sizing: border-box" style="width: 552rpx; height: 97rpx; display: flex; box-sizing: border-box">
     <view class="filter-item {{filterStatus === 'all' ? 'active' : ''}}" bindtap="onFilterChange" data-status="all">全部</view>
     <view class="filter-item {{filterStatus === 'pending' ? 'active' : ''}}" bindtap="onFilterChange" data-status="pending">待审核</view>
     <view class="filter-item {{filterStatus === 'approved' ? 'active' : ''}}" bindtap="onFilterChange" data-status="approved">已通过</view>

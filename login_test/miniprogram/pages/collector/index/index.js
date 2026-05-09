@@ -19,6 +19,13 @@ Page({
     },
     functionList: [
       {
+        id: 'new',
+        title: '新建采集',
+        icon: '/images/icons/add.png',
+        desc: '开始采集新POI',
+        path: '/pages/collector/collect/index'
+      },
+      {
         id: 'tasks',
         title: '任务列表',
         icon: '/images/icons/task.png',

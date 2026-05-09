@@ -1,13 +1,16 @@
+/* 自定义标签栏样式 - 绿色主题配色系统 */
+
 .tab-bar {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
   height: 100rpx;
-  background: #ffffff;
-  border-top: 1rpx solid #e8e8e8;
+  background: linear-gradient(180deg, #ffffff 0%, #f0fff4 100%);
+  border-top: 1rpx solid #e5e7eb;
   padding-bottom: env(safe-area-inset-bottom);
   z-index: 1000;
+  box-shadow: 0 -4rpx 16rpx rgba(7, 193, 96, 0.08);
 }
 
 .tab-content {
@@ -24,21 +27,35 @@
   justify-content: center;
   flex: 1;
   height: 100%;
-  transition: all 0.3s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.tab-item:active {
+  transform: scale(0.95);
 }
 
 .tab-icon {
   font-size: 44rpx;
   margin-bottom: 4rpx;
+  transition: all 0.3s ease;
 }
 
 .tab-text {
   font-size: 22rpx;
-  color: #999999;
-  transition: all 0.3s;
+  color: #9ca3af;
+  transition: all 0.3s ease;
+}
+
+.tab-item.active {
+  color: #07c160;
 }
 
 .tab-item.active .tab-text {
   color: #07c160;
-  font-weight: bold;
+  font-weight: 600;
+}
+
+.tab-item.active .tab-icon {
+  transform: scale(1.1);
 }

@@ -1,8 +1,10 @@
+/* 聊天页面样式 - 绿色主题配色系统 */
+
 .container {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #f0f2f5;
+  background: linear-gradient(180deg, #f0fff4 0%, #f5f5f5 100%);
 }
 
 .login-tip {
@@ -11,7 +13,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: #ffffff;
+  background: linear-gradient(135deg, #ffffff 0%, #f0fff4 100%);
   margin: 0;
   border-radius: 0;
   padding: 120rpx 60rpx;
@@ -25,20 +27,20 @@
 .tip-title {
   font-size: 40rpx;
   font-weight: bold;
-  color: #333333;
+  color: #1f2937;
   margin-bottom: 20rpx;
 }
 
 .tip-desc {
   font-size: 28rpx;
-  color: #999999;
+  color: #6b7280;
   margin-bottom: 60rpx;
 }
 
 .login-btn {
   width: 600rpx;
   height: 88rpx;
-  background: linear-gradient(135deg, #07c160 0%, #06ad56 100%);
+  background: linear-gradient(135deg, #07c160 0%, #10b981 100%);
   border-radius: 44rpx;
   display: flex;
   align-items: center;
@@ -47,10 +49,16 @@
   margin: 0;
   padding: 0;
   border: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .login-btn::after {
   border: none;
+}
+
+.login-btn:active {
+  transform: scale(0.96);
+  box-shadow: 0 4rpx 12rpx rgba(7, 193, 96, 0.2);
 }
 
 .login-btn text {
@@ -63,7 +71,7 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background: #f0f2f5;
+  background: linear-gradient(180deg, #f0fff4 0%, #f5f5f5 100%);
 }
 
 .header {
@@ -71,8 +79,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 24rpx 32rpx;
-  background: linear-gradient(135deg, #07c160 0%, #10b981 100%);
-  box-shadow: 0 4rpx 16rpx rgba(7, 193, 96, 0.2);
+  background: linear-gradient(135deg, #07c160 0%, #10b981 50%, #06b5b7 100%);
+  box-shadow: 0 4rpx 20rpx rgba(7, 193, 96, 0.25);
 }
 
 .header-title {
@@ -104,10 +112,10 @@
 
 .tab-bar {
   display: flex;
-  background: #ffffff;
+  background: linear-gradient(135deg, #ffffff 0%, #f0fff4 100%);
   padding: 0 16rpx;
   border-radius: 0 0 24rpx 24rpx;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4rpx 16rpx rgba(7, 193, 96, 0.1);
 }
 
 .tab-item {
@@ -117,12 +125,13 @@
   justify-content: center;
   padding: 28rpx 0;
   position: relative;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 20rpx;
 }
 
 .tab-text {
   font-size: 28rpx;
-  color: #666666;
+  color: #6b7280;
   font-weight: 500;
   transition: all 0.3s ease;
 }
@@ -149,14 +158,14 @@
 .tab-badge {
   min-width: 36rpx;
   height: 36rpx;
-  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a5a 100%);
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   border-radius: 18rpx;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0 10rpx;
   margin-left: 8rpx;
-  box-shadow: 0 2rpx 8rpx rgba(238, 90, 90, 0.3);
+  box-shadow: 0 2rpx 8rpx rgba(239, 68, 68, 0.3);
 }
 
 .tab-badge text {
@@ -179,7 +188,7 @@
 
 .section-title {
   font-size: 28rpx;
-  color: #666666;
+  color: #6b7280;
   font-weight: 600;
   padding: 0 8rpx;
   margin-bottom: 20rpx;
@@ -194,17 +203,17 @@
   display: flex;
   align-items: flex-start;
   padding: 28rpx;
-  background: #ffffff;
+  background: linear-gradient(135deg, #ffffff 0%, #f0fff4 100%);
   border-radius: 20rpx;
   margin-bottom: 16rpx;
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4rpx 16rpx rgba(7, 193, 96, 0.08);
   position: relative;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .notification-item:active {
   transform: scale(0.98);
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2rpx 8rpx rgba(7, 193, 96, 0.05);
 }
 
 .notification-icon {
@@ -227,7 +236,7 @@
 
 .notification-title {
   font-size: 30rpx;
-  color: #333333;
+  color: #1f2937;
   margin-bottom: 12rpx;
   line-height: 1.5;
   font-weight: 500;
@@ -235,15 +244,15 @@
 
 .notification-time {
   font-size: 24rpx;
-  color: #999999;
+  color: #9ca3af;
 }
 
 .unread-dot {
   width: 16rpx;
   height: 16rpx;
-  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a5a 100%);
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   border-radius: 50%;
-  box-shadow: 0 2rpx 8rpx rgba(238, 90, 90, 0.3);
+  box-shadow: 0 2rpx 8rpx rgba(239, 68, 68, 0.3);
   position: absolute;
   top: 28rpx;
   right: 28rpx;
@@ -255,8 +264,9 @@
   align-items: center;
   justify-content: center;
   padding: 120rpx 60rpx;
-  background: #ffffff;
+  background: linear-gradient(135deg, #ffffff 0%, #f0fff4 100%);
   border-radius: 20rpx;
+  box-shadow: 0 4rpx 16rpx rgba(7, 193, 96, 0.08);
 }
 
 .empty-icon {
@@ -267,14 +277,14 @@
 
 .empty-text {
   font-size: 30rpx;
-  color: #666666;
+  color: #1f2937;
   margin-bottom: 12rpx;
   font-weight: 500;
 }
 
 .empty-hint {
   font-size: 26rpx;
-  color: #999999;
+  color: #6b7280;
   text-align: center;
   line-height: 1.6;
 }
@@ -283,16 +293,16 @@
   display: flex;
   align-items: center;
   padding: 28rpx 24rpx;
-  background: #ffffff;
+  background: linear-gradient(135deg, #ffffff 0%, #f0fff4 100%);
   border-radius: 20rpx;
   margin-bottom: 16rpx;
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
-  transition: all 0.3s ease;
+  box-shadow: 0 4rpx 16rpx rgba(7, 193, 96, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .chat-item:active {
   transform: scale(0.98);
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2rpx 8rpx rgba(7, 193, 96, 0.05);
 }
 
 .chat-avatar {
@@ -316,14 +326,14 @@
 
 .chat-name {
   font-size: 32rpx;
-  color: #333333;
+  color: #1f2937;
   margin-bottom: 10rpx;
   font-weight: 600;
 }
 
 .chat-preview {
   font-size: 26rpx;
-  color: #999999;
+  color: #6b7280;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -338,20 +348,20 @@
 
 .chat-time {
   font-size: 22rpx;
-  color: #bbbbbb;
+  color: #9ca3af;
   margin-bottom: 12rpx;
 }
 
 .unread-badge {
   min-width: 40rpx;
   height: 40rpx;
-  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a5a 100%);
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   border-radius: 20rpx;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0 12rpx;
-  box-shadow: 0 2rpx 8rpx rgba(238, 90, 90, 0.3);
+  box-shadow: 0 2rpx 8rpx rgba(239, 68, 68, 0.3);
 }
 
 .unread-badge text {
@@ -364,16 +374,16 @@
   display: flex;
   align-items: center;
   padding: 32rpx;
-  background: #ffffff;
+  background: linear-gradient(135deg, #ffffff 0%, #f0fff4 100%);
   border-radius: 24rpx;
   margin-bottom: 16rpx;
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
-  transition: all 0.3s ease;
+  box-shadow: 0 4rpx 16rpx rgba(7, 193, 96, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .group-item:active {
   transform: scale(0.98);
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2rpx 8rpx rgba(7, 193, 96, 0.05);
 }
 
 .group-item:last-child {
@@ -389,7 +399,7 @@
   justify-content: center;
   font-size: 52rpx;
   margin-right: 28rpx;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4rpx 12rpx rgba(7, 193, 96, 0.1);
 }
 
 .group-icon.collector {
@@ -408,18 +418,18 @@
 
 .group-name {
   font-size: 34rpx;
-  color: #333333;
+  color: #1f2937;
   font-weight: bold;
   margin-bottom: 10rpx;
 }
 
 .group-desc {
   font-size: 26rpx;
-  color: #999999;
+  color: #6b7280;
 }
 
 .group-arrow {
   font-size: 48rpx;
-  color: #cccccc;
+  color: #d1d5db;
   font-weight: 300;
 }

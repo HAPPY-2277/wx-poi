@@ -1,19 +1,20 @@
-/* 核验列表页样式 */
+/* 核验列表页样式 - 绿色主题配色系统 */
 
 /* 页面容器 */
 .container {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: #f6f6f6;
+  background: linear-gradient(180deg, #f0fff4 0%, #f5f5f5 100%);
 }
 
 /* 筛选工具栏 */
 .filter-toolbar {
-  background: #fff;
+  background: linear-gradient(135deg, #ffffff 0%, #f0fff4 100%);
   padding: 20rpx;
   margin-bottom: 20rpx;
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4rpx 16rpx rgba(7, 193, 96, 0.08);
+  border-radius: 0 0 24rpx 24rpx;
 }
 
 .filter-group {
@@ -28,7 +29,7 @@
 
 .filter-label {
   font-size: 28rpx;
-  color: #666;
+  color: #6b7280;
   width: 80rpx;
   flex-shrink: 0;
 }
@@ -48,47 +49,55 @@
   align-items: center;
   justify-content: center;
   padding: 10rpx 24rpx;
-  background: #f0f0f0;
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
   border-radius: 24rpx;
   border: 2rpx solid transparent;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .filter-tag.active {
-  background: #f0f7ff;
-  border-color: #409eff;
+  background: linear-gradient(135deg, #07c160 0%, #10b981 100%);
+  border-color: #07c160;
 }
 
 .tag-text {
   font-size: 26rpx;
-  color: #666;
+  color: #6b7280;
 }
 
 .filter-tag.active .tag-text {
-  color: #409eff;
+  color: #ffffff;
+  font-weight: 600;
 }
 
 /* POI 列表 */
 .poi-list {
   flex: 1;
-  padding: 0 20rpx;
+  padding: 0 24rpx;
 }
 
 /* POI 卡片 */
 .poi-card {
   display: flex;
   align-items: center;
-  background: #fff;
-  border-radius: 16rpx;
+  background: linear-gradient(135deg, #ffffff 0%, #f0fff4 100%);
+  border-radius: 20rpx;
   padding: 24rpx;
   margin-bottom: 20rpx;
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4rpx 16rpx rgba(7, 193, 96, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.poi-card:active {
+  transform: scale(0.98);
+  box-shadow: 0 2rpx 8rpx rgba(7, 193, 96, 0.05);
 }
 
 .poi-image-wrapper {
   position: relative;
   width: 160rpx;
   height: 160rpx;
-  border-radius: 12rpx;
+  border-radius: 16rpx;
   overflow: hidden;
   margin-right: 20rpx;
   flex-shrink: 0;
@@ -103,9 +112,9 @@
   position: absolute;
   top: 0;
   left: 0;
-  background: rgba(64, 158, 255, 0.9);
+  background: linear-gradient(135deg, #07c160 0%, #10b981 100%);
   padding: 4rpx 12rpx;
-  border-radius: 12rpx 0 12rpx 0;
+  border-radius: 16rpx 0 16rpx 0;
 }
 
 .category-text {
@@ -130,7 +139,7 @@
 .poi-name {
   font-size: 32rpx;
   font-weight: 600;
-  color: #333;
+  color: #1f2937;
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -138,16 +147,16 @@
 }
 
 .priority-tag {
-  background: #fef0f0;
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
   padding: 4rpx 12rpx;
-  border-radius: 12rpx;
+  border-radius: 16rpx;
   margin-left: 12rpx;
   flex-shrink: 0;
 }
 
 .priority-text {
   font-size: 22rpx;
-  color: #f56c6c;
+  color: #dc2626;
 }
 
 .poi-address {
@@ -156,7 +165,7 @@
 
 .address-text {
   font-size: 26rpx;
-  color: #666;
+  color: #6b7280;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -170,7 +179,7 @@
 
 .submit-time {
   font-size: 24rpx;
-  color: #999;
+  color: #9ca3af;
 }
 
 /* 箭头 */
@@ -181,8 +190,8 @@
 
 .arrow-icon {
   font-size: 48rpx;
-  color: #ccc;
-  font-weight: bold;
+  color: #d1d5db;
+  font-weight: 300;
 }
 
 /* 空状态 */
@@ -191,7 +200,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 100rpx 0;
+  padding: 120rpx 0;
 }
 
 .empty-icon {
@@ -202,7 +211,7 @@
 
 .empty-text {
   font-size: 28rpx;
-  color: #999;
+  color: #6b7280;
 }
 
 /* 加载状态 */
@@ -215,7 +224,7 @@
 
 .loading-text {
   font-size: 28rpx;
-  color: #409eff;
+  color: #07c160;
 }
 
 /* 加载更多 */
@@ -228,7 +237,7 @@
 
 .load-more-text {
   font-size: 28rpx;
-  color: #409eff;
+  color: #07c160;
 }
 
 /* 没有更多 */
@@ -241,5 +250,5 @@
 
 .no-more-text {
   font-size: 26rpx;
-  color: #999;
+  color: #d1d5db;
 }

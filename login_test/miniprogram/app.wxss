@@ -1,27 +1,183 @@
-/**app.wxss**/
+/** 应用全局样式 - 绿色主题配色系统 **/
+
+/* ==================== 颜色变量定义 ==================== */
+page {
+  /* 主色系 - 绿色主题 */
+  --primary-start: #07c160;
+  --primary-end: #10b981;
+  --primary: #07c160;
+  --primary-light: #10b981;
+  --primary-dark: #06ad56;
+  --primary-glow: rgba(7, 193, 96, 0.3);
+
+  /* 功能辅助色 */
+  --success: #10b981;
+  --success-light: #a7f3d0;
+  --warning: #f59e0b;
+  --warning-light: #fde68a;
+  --danger: #ef4444;
+  --danger-light: #fecdd3;
+  --info: #3b82f6;
+  --info-light: #bfdbfe;
+
+  /* 中性色 - 文本 */
+  --text-primary: #1f2937;
+  --text-secondary: #374151;
+  --text-tertiary: #6b7280;
+  --text-placeholder: #9ca3af;
+  --text-disabled: #d1d5db;
+
+  /* 中性色 - 背景 */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9fafb;
+  --bg-tertiary: #f3f4f6;
+  --bg-page: linear-gradient(180deg, #f0fff4 0%, #f5f5f5 100%);
+
+  /* 中性色 - 边框/分割线 */
+  --border-light: #f3f4f6;
+  --border-default: #e5e7eb;
+  --border-dark: #d1d5db;
+
+  /* 阴影 */
+  --shadow-sm: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 8rpx 24rpx rgba(0, 0, 0, 0.08);
+  --shadow-primary: 0 8rpx 24rpx rgba(7, 193, 96, 0.25);
+
+  /* 渐变 */
+  --gradient-primary: linear-gradient(135deg, var(--primary-start) 0%, var(--primary-end) 100%);
+  --gradient-subtle: linear-gradient(180deg, #f0fff4 0%, #f5f5f5 100%);
+  --gradient-card: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+
+  /* 圆角 */
+  --radius-sm: 8rpx;
+  --radius-md: 16rpx;
+  --radius-lg: 24rpx;
+  --radius-xl: 32rpx;
+  --radius-full: 9999rpx;
+
+  /* 动效 */
+  --transition-fast: all 0.2s ease;
+  --transition-normal: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ==================== 基础样式重置 ==================== */
+page {
+  background: #f5f5f5;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
 .container {
   display: flex;
   flex-direction: column;
   align-items: center;
   box-sizing: border-box;
-} 
+}
 
+/* ==================== 按钮基础样式 ==================== */
 button {
   background: initial;
 }
 
-button:focus{
+button:focus {
   outline: 0;
 }
 
-button::after{
+button::after {
   border: none;
 }
 
+/* ==================== 通用按钮样式 ==================== */
+.btn-primary {
+  background: var(--gradient-primary);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-primary);
+  transition: var(--transition-normal);
+}
 
-page {
-  background: #f6f6f6;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
+.btn-primary:active {
+  transform: scale(0.96);
+  box-shadow: 0 4rpx 12rpx rgba(7, 193, 96, 0.2);
+}
+
+.btn-secondary {
+  background: var(--gradient-card);
+  color: var(--text-secondary);
+  border: 1rpx solid var(--border-default);
+  border-radius: var(--radius-full);
+  transition: var(--transition-normal);
+}
+
+.btn-secondary:active {
+  transform: scale(0.96);
+  background: var(--bg-tertiary);
+}
+
+/* ==================== 通用卡片样式 ==================== */
+.card {
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  transition: var(--transition-normal);
+}
+
+.card:active {
+  transform: scale(0.98);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ==================== 通用徽章样式 ==================== */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rpx 12rpx;
+  border-radius: var(--radius-full);
+  font-size: 22rpx;
+  font-weight: 600;
+}
+
+.badge-primary {
+  background: var(--gradient-primary);
+  color: #ffffff;
+}
+
+.badge-success {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+}
+
+.badge-warning {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #ffffff;
+}
+
+.badge-danger {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: #ffffff;
+}
+
+/* ==================== 通用加载动画 ==================== */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.loading {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* ==================== 滑入动画 ==================== */
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }

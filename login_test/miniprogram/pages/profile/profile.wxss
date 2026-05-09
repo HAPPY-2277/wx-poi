@@ -1,9 +1,11 @@
+/* 个人中心页面样式 - 绿色主题配色系统 */
+
 .container {
   display: flex;
   flex-direction: column;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
+  background: linear-gradient(180deg, #f0fff4 0%, #f5f5f5 100%);
   padding: 0 40rpx;
 }
 
@@ -17,21 +19,21 @@
 .title {
   font-size: 48rpx;
   font-weight: bold;
-  color: #333;
+  color: #1f2937;
   margin-bottom: 16rpx;
 }
 
 .subtitle {
   font-size: 28rpx;
-  color: #999;
+  color: #6b7280;
 }
 
 .form {
   width: 100%;
-  background: #fff;
+  background: linear-gradient(135deg, #ffffff 0%, #f0fff4 100%);
   border-radius: 24rpx;
   padding: 40rpx;
-  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+  box-shadow: 0 8rpx 24rpx rgba(7, 193, 96, 0.1);
 }
 
 .form-item {
@@ -45,24 +47,26 @@
 .label {
   display: block;
   font-size: 28rpx;
-  color: #666;
+  color: #6b7280;
   margin-bottom: 16rpx;
 }
 
 .input {
   width: 100%;
   height: 88rpx;
-  border: 2rpx solid #e8e8e8;
-  border-radius: 16rpx;
+  border: 2rpx solid #e5e7eb;
+  border-radius: 20rpx;
   padding: 0 24rpx;
   font-size: 32rpx;
-  background: #fafafa;
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
   box-sizing: border-box;
+  transition: all 0.3s ease;
 }
 
 .input:focus {
   border-color: #07c160;
-  background: #fff;
+  background: #ffffff;
+  box-shadow: 0 0 0 4rpx rgba(7, 193, 96, 0.1);
 }
 
 .role-picker {
@@ -71,46 +75,52 @@
   justify-content: space-between;
   width: 100%;
   height: 88rpx;
-  border: 2rpx solid #e8e8e8;
-  border-radius: 16rpx;
+  border: 2rpx solid #e5e7eb;
+  border-radius: 20rpx;
   padding: 0 24rpx;
-  background: #fafafa;
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
   box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+.role-picker:active {
+  border-color: #07c160;
 }
 
 .value {
   font-size: 32rpx;
-  color: #333;
+  color: #1f2937;
 }
 
 .placeholder {
   font-size: 32rpx;
-  color: #999;
+  color: #9ca3af;
 }
 
 .arrow {
   font-size: 24rpx;
-  color: #999;
+  color: #9ca3af;
 }
 
 .role-desc {
-  background: #f0f9eb;
-  border-radius: 12rpx;
+  background: linear-gradient(135deg, #f0fff4 0%, #dcfce7 100%);
+  border-radius: 16rpx;
   padding: 20rpx 24rpx;
-  margin-top: -20rpx;
+  margin-top: -16rpx;
   margin-bottom: 40rpx;
+  border-left: 4rpx solid #07c160;
 }
 
 .desc-text {
   font-size: 26rpx;
-  color: #67c23a;
+  color: #059669;
   line-height: 1.6;
 }
 
 .submit-btn {
   width: 100%;
   height: 96rpx;
-  background: linear-gradient(135deg, #07c160 0%, #06ad56 100%);
+  background: linear-gradient(135deg, #07c160 0%, #10b981 100%);
   color: #fff;
   font-size: 34rpx;
   font-weight: bold;
@@ -120,6 +130,7 @@
   align-items: center;
   justify-content: center;
   box-shadow: 0 8rpx 24rpx rgba(7, 193, 96, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .submit-btn::after {
@@ -127,8 +138,8 @@
 }
 
 .submit-btn:active {
-  opacity: 0.9;
-  transform: scale(0.98);
+  transform: scale(0.96);
+  box-shadow: 0 4rpx 12rpx rgba(7, 193, 96, 0.2);
 }
 
 /* 身份选择弹窗样式 */
@@ -138,28 +149,31 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.7) 100%);
   z-index: 1000;
   display: flex;
   align-items: flex-end;
   justify-content: center;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .picker-content {
   width: 100%;
-  background: #fff;
+  background: linear-gradient(180deg, #ffffff 0%, #f0fff4 100%);
   border-radius: 32rpx 32rpx 0 0;
   padding-bottom: env(safe-area-inset-bottom);
-  animation: slideUp 0.3s ease;
+  animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 -8rpx 32rpx rgba(7, 193, 96, 0.12);
 }
 
 @keyframes slideUp {
-  from {
-    transform: translateY(100%);
-  }
-  to {
-    transform: translateY(0);
-  }
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
 }
 
 .picker-header {
@@ -167,13 +181,13 @@
   align-items: center;
   justify-content: center;
   padding: 32rpx;
-  border-bottom: 1rpx solid #f0f0f0;
+  border-bottom: 1rpx solid #e5e7eb;
 }
 
 .picker-title {
   font-size: 32rpx;
   font-weight: bold;
-  color: #333;
+  color: #1f2937;
 }
 
 .picker-body {
@@ -184,13 +198,14 @@
   display: flex;
   align-items: center;
   padding: 32rpx;
-  border-radius: 16rpx;
+  border-radius: 20rpx;
   margin-bottom: 16rpx;
-  background: #fafafa;
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .picker-item.selected {
-  background: #f0f9eb;
+  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
   border: 2rpx solid #07c160;
 }
 
@@ -202,11 +217,12 @@
   width: 80rpx;
   height: 80rpx;
   border-radius: 50%;
-  background: #fff;
+  background: linear-gradient(135deg, #ffffff 0%, #f0fff4 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   margin-right: 24rpx;
+  box-shadow: 0 4rpx 12rpx rgba(7, 193, 96, 0.1);
 }
 
 .icon-text {
@@ -222,26 +238,27 @@
 .item-label {
   font-size: 32rpx;
   font-weight: bold;
-  color: #333;
+  color: #1f2937;
   margin-bottom: 8rpx;
 }
 
 .item-desc {
   font-size: 26rpx;
-  color: #999;
+  color: #6b7280;
 }
 
 .item-check {
   width: 48rpx;
   height: 48rpx;
   border-radius: 50%;
-  background: #07c160;
+  background: linear-gradient(135deg, #07c160 0%, #10b981 100%);
   color: #fff;
   font-size: 28rpx;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: bold;
+  box-shadow: 0 2rpx 8rpx rgba(7, 193, 96, 0.3);
 }
 
 .picker-footer {
@@ -251,15 +268,20 @@
 .cancel-btn {
   width: 100%;
   height: 88rpx;
-  background: #f5f5f5;
-  color: #666;
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+  color: #6b7280;
   font-size: 32rpx;
   border-radius: 44rpx;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.3s ease;
 }
 
 .cancel-btn::after {
   border: none;
+}
+
+.cancel-btn:active {
+  transform: scale(0.96);
 }

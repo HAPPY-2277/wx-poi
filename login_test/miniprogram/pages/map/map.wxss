@@ -1,3 +1,5 @@
+/* 地图页面样式 - 绿色主题配色系统 */
+
 .container {
   position: relative;
   height: 100vh;
@@ -9,16 +11,16 @@
   top: 20rpx;
   left: 20rpx;
   z-index: 100;
-  background: rgba(255, 255, 255, 0.95);
+  background: linear-gradient(135deg, #ffffff 0%, #f0fff4 100%);
   padding: 16rpx 24rpx;
   border-radius: 24rpx;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4rpx 16rpx rgba(7, 193, 96, 0.15);
 }
 
 .user-name {
   font-size: 28rpx;
   font-weight: bold;
-  color: #333;
+  color: #1f2937;
 }
 
 .map {
@@ -37,10 +39,10 @@
 .search-box {
   display: flex;
   align-items: center;
-  background: #fff;
+  background: linear-gradient(135deg, #ffffff 0%, #f0fff4 100%);
   border-radius: 40rpx;
   padding: 16rpx 24rpx;
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8rpx 24rpx rgba(7, 193, 96, 0.15);
 }
 
 .search-input {
@@ -49,19 +51,30 @@
   font-size: 28rpx;
   border: none;
   outline: none;
+  background: transparent;
+}
+
+.search-input::placeholder {
+  color: #9ca3af;
 }
 
 .search-btn {
-  background: #07c160;
+  background: linear-gradient(135deg, #07c160 0%, #10b981 100%);
   color: #fff;
   font-size: 26rpx;
   padding: 12rpx 32rpx;
   border-radius: 32rpx;
   margin-left: 16rpx;
+  box-shadow: 0 4rpx 12rpx rgba(7, 193, 96, 0.3);
+  transition: all 0.3s ease;
 }
 
 .search-btn::after {
   border: none;
+}
+
+.search-btn:active {
+  transform: scale(0.95);
 }
 
 .location-btn {
@@ -71,16 +84,21 @@
   z-index: 100;
   width: 100rpx;
   height: 100rpx;
-  background: #fff;
+  background: linear-gradient(135deg, #ffffff 0%, #f0fff4 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8rpx 24rpx rgba(7, 193, 96, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.location-btn:active {
+  transform: scale(0.95);
 }
 
 .location-text {
   font-size: 24rpx;
   color: #07c160;
-  font-weight: bold;
+  font-weight: 600;
 }
