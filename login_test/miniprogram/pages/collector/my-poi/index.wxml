@@ -1,8 +1,5 @@
-<!-- 我的采集列表页面 -->
 <view class="container">
-
-  <!-- 统计信息栏 -->
-  <view class="stats-bar" style="width: 531rpx; height: 174rpx; display: flex; box-sizing: border-box">
+  <view class="stats-bar">
     <view class="stat-item">
       <text class="stat-value">{{stats.total}}</text>
       <text class="stat-label">总计</text>
@@ -24,124 +21,49 @@
     </view>
   </view>
 
-  <!-- 筛选标签栏 -->
-  <view class="filter-bar" style="width: 531rpx; height: 174rpx; display: flex; box-sizing: border-box; left: NaNrpx; top: 0rpx">
-    <view
-      class="filter-item {{filterStatus === 'all' ? 'active' : ''}}"
-      bindtap="onFilterChange"
-      data-status="all"
-    >
-      全部
-    </view>
-    <view
-      class="filter-item {{filterStatus === 'pending' ? 'active' : ''}}"
-      bindtap="onFilterChange"
-      data-status="pending"
-    >
-      待审核
-    </view>
-    <view
-      class="filter-item {{filterStatus === 'approved' ? 'active' : ''}}"
-      bindtap="onFilterChange"
-      data-status="approved"
-    >
-      已通过
-    </view>
-    <view
-      class="filter-item {{filterStatus === 'rejected' ? 'active' : ''}}"
-      bindtap="onFilterChange"
-      data-status="rejected"
-    >
-      已拒绝
-    </view>
-    <view
-      class="filter-item {{filterStatus === 'draft' ? 'active' : ''}}"
-      bindtap="onFilterChange"
-      data-status="draft"
-    >
-      草稿
-    </view>
+  <view class="filter-bar">
+    <view class="filter-item {{filterStatus === 'all' ? 'active' : ''}}" bindtap="onFilterChange" data-status="all">全部</view>
+    <view class="filter-item {{filterStatus === 'pending' ? 'active' : ''}}" bindtap="onFilterChange" data-status="pending">待审核</view>
+    <view class="filter-item {{filterStatus === 'approved' ? 'active' : ''}}" bindtap="onFilterChange" data-status="approved">已通过</view>
+    <view class="filter-item {{filterStatus === 'rejected' ? 'active' : ''}}" bindtap="onFilterChange" data-status="rejected">已拒绝</view>
+    <view class="filter-item {{filterStatus === 'draft' ? 'active' : ''}}" bindtap="onFilterChange" data-status="draft">草稿</view>
   </view>
 
-  <!-- POI列表 -->
   <view class="poi-list">
-
-    <!-- POI项 -->
-    <view
-      class="poi-item"
-      wx:for="{{poiList}}"
-      wx:key="id"
-      bindtap="onPOITap"
-      data-id="{{item.id}}"
-    >
-      <!-- 图片区域 -->
+    <view class="poi-item" wx:for="{{poiList}}" wx:key="id" bindtap="onPOITap" data-id="{{item.id}}">
       <view class="poi-image">
-        <image
-          wx:if="{{item.photos && item.photos.length > 0}}"
-          src="{{item.photos[0]}}"
-          mode="aspectFill"
-        ></image>
-        <view wx:else class="no-image">
-          <text>暂无图片</text>
-        </view>
-
-        <!-- 状态标签 -->
-        <view
-          class="poi-status"
-          style="background-color: {{getStatusInfo(item.status).color}}"
-        >
-          {{getStatusInfo(item.status).icon}} {{getStatusInfo(item.status).label}}
-        </view>
+        <image wx:if="{{item.photos && item.photos.length > 0}}" src="{{item.photos[0]}}" mode="aspectFill"></image>
+        <view wx:else class="no-image"><text>暂无图片</text></view>
+        <view class="poi-status" style="background-color: {{getStatusInfo(item.status).color}}">{{getStatusInfo(item.status).icon}} {{getStatusInfo(item.status).label}}</view>
       </view>
 
-      <!-- POI内容 -->
       <view class="poi-content">
         <view class="poi-header">
-          <!-- POI名称 -->
           <text class="poi-name">{{item.name}}</text>
-          <!-- 分类标签 -->
-          <text class="poi-category" wx:if="{{item.categoryName}}">
-            {{item.categoryName}}
-          </text>
+          <text class="poi-category" wx:if="{{item.categoryName}}">{{item.categoryName}}</text>
         </view>
 
-        <!-- 地址 -->
         <view class="poi-address">
           <text class="address-icon">📍</text>
           <text class="address-text">{{item.address || '未提供地址'}}</text>
         </view>
 
-        <!-- 拒绝原因 -->
-        <view
-          class="poi-reason"
-          wx:if="{{item.status === 'rejected' && item.rejectReason}}"
-        >
+        <view class="poi-reason" wx:if="{{item.status === 'rejected' && item.rejectReason}}">
           <text class="reason-icon">❗</text>
           <text class="reason-text">{{item.rejectReason}}</text>
         </view>
 
-        <!-- POI底部信息 -->
         <view class="poi-footer">
-          <!-- 提交时间 -->
           <text class="poi-time">{{formatTime(item.createTime)}}</text>
-
-          <!-- 操作按钮（仅草稿显示） -->
-          <view
-            class="poi-actions"
-            wx:if="{{item.status === 'draft'}}"
-            catchtap="onDeleteDraft"
-            data-id="{{item.id}}"
-          >
+          <view class="poi-actions" wx:if="{{item.status === 'draft'}}" catchtap="onDeleteDraft" data-id="{{item.id}}">
             <text class="action-btn delete">删除</text>
           </view>
         </view>
       </view>
 
-      <!-- 箭头指示 -->
       <view class="poi-arrow">›</view>
     </view>
 
-    <!-- 空状态 -->
     <view class="empty-state" wx:if="{{!loading && poiList.length === 0}}">
       <image class="empty-icon" src="/images/icons/empty.png" mode="aspectFit"></image>
       <text class="empty-text">暂无采集记录</text>
@@ -149,16 +71,36 @@
       <button class="start-collect-btn" bindtap="goToCollect">开始采集</button>
     </view>
 
-    <!-- 加载更多 -->
-    <view class="loading-more" wx:if="{{loading && poiList.length > 0}}">
-      <text>加载中...</text>
-    </view>
-
-    <!-- 没有更多数据 -->
-    <view class="no-more" wx:if="{{!hasMore && poiList.length > 0}}">
-      <text>没有更多了</text>
-    </view>
-
+    <view class="loading-more" wx:if="{{loading && poiList.length > 0}}"><text>加载中...</text></view>
+    <view class="no-more" wx:if="{{!hasMore && poiList.length > 0}}"><text>没有更多了</text></view>
   </view>
 
+  <view class="modal-mask" wx:if="{{showRecheckModal}}" bindtap="hideRecheckModal"></view>
+  <view class="recheck-modal" wx:if="{{showRecheckModal}}">
+    <view class="modal-title">复核操作</view>
+    <view class="modal-poi-name">{{recheckPOI.name}}</view>
+    
+    <view class="recheck-options">
+      <view class="recheck-option {{recheckAction === 'recollect' ? 'active' : ''}}" data-action="recollect" bindtap="onRecheckActionSelect">
+        <text class="option-icon">🔄</text>
+        <text class="option-text">重新采集</text>
+      </view>
+      <view class="recheck-option {{recheckAction === 'update' ? 'active' : ''}}" data-action="update" bindtap="onRecheckActionSelect">
+        <text class="option-icon">✏️</text>
+        <text class="option-text">更新数据</text>
+      </view>
+      <view class="recheck-option {{recheckAction === 'reject_recheck' ? 'active' : ''}}" data-action="reject_recheck" bindtap="onRecheckActionSelect">
+        <text class="option-icon">⚠️</text>
+        <text class="option-text">驳回</text>
+      </view>
+    </view>
+
+    <textarea class="recheck-reason" placeholder="请输入处理说明..." value="{{recheckReason}}" bindinput="onRecheckReasonInput" maxlength="500"></textarea>
+
+    <view class="modal-actions">
+      <button class="modal-btn cancel" bindtap="hideRecheckModal">取消</button>
+      <button class="modal-btn contact" bindtap="onContactVerifier">联系核验者</button>
+      <button class="modal-btn submit" bindtap="onRecheckSubmit">确认</button>
+    </view>
+  </view>
 </view>

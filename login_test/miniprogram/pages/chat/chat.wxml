@@ -1,0 +1,92 @@
+<view class="container">
+  <view class="login-tip" wx:if="{{!isLoggedIn}}">
+    <view class="tip-icon">💬</view>
+    <text class="tip-title">请先登录</text>
+    <text class="tip-desc">登录后即可使用聊天功能</text>
+    <button class="login-btn" bindtap="goToLogin">前往登录</button>
+  </view>
+
+  <view class="chat-wrapper" wx:else>
+    <view class="header">
+      <text class="header-title">消息中心</text>
+      <view class="user-info">
+        <image class="avatar" src="{{userInfo.avatar}}" mode="aspectFill" />
+        <text class="nickname">{{userInfo.nickname}}</text>
+      </view>
+    </view>
+
+    <view class="tab-bar">
+      <view class="tab-item {{activeTab === 'system' ? 'active' : ''}}" data-tab="system" bindtap="onTabChange">
+        <text class="tab-text">系统通知</text>
+        <view class="tab-badge" wx:if="{{unreadCount > 0}}"><text>{{unreadCount > 99 ? '99+' : unreadCount}}</text></view>
+      </view>
+      <view class="tab-item {{activeTab === 'private' ? 'active' : ''}}" data-tab="private" bindtap="onTabChange">
+        <text class="tab-text">私聊</text>
+      </view>
+      <view class="tab-item {{activeTab === 'group' ? 'active' : ''}}" data-tab="group" bindtap="onTabChange">
+        <text class="tab-text">群聊</text>
+      </view>
+    </view>
+
+    <view class="content" style="width: 587rpx; display: block; box-sizing: border-box">
+      <view class="system-list" wx:if="{{activeTab === 'system'}}">
+        <block wx:if="{{systemNotifications.length > 0}}">
+          <view class="notification-item" wx:for="{{systemNotifications}}" wx:key="msg_uuid" data-index="{{index}}" bindtap="onNotificationTap">
+            <view class="notification-icon">📢</view>
+            <view class="notification-content">
+              <text class="notification-title">{{item.content}}</text>
+              <text class="notification-time">{{item.created_at}}</text>
+            </view>
+            <view class="unread-dot" wx:if="{{!item.is_read}}"></view>
+          </view>
+        </block>
+        <view class="empty-state" wx:else>
+          <view class="empty-icon">🔔</view>
+          <text class="empty-text">暂无系统通知</text>
+          <text class="empty-hint">有新消息时会在此处显示</text>
+        </view>
+      </view>
+
+      <view class="private-list" wx:if="{{activeTab === 'private'}}">
+        <text class="section-title">最近私聊</text>
+        <block wx:if="{{privateChats.length > 0}}">
+          <view class="chat-item" wx:for="{{privateChats}}" wx:key="targetId" data-targetId="{{item.targetId}}" bindtap="onPrivateChatTap">
+            <view class="chat-avatar">👤</view>
+            <view class="chat-info">
+              <text class="chat-name">用户 {{item.targetId}}</text>
+              <text class="chat-preview">{{item.lastMessage.content}}</text>
+            </view>
+            <view class="chat-meta">
+              <text class="chat-time">{{item.lastMessage.created_at}}</text>
+              <view class="unread-badge" wx:if="{{item.unread > 0}}"><text>{{item.unread}}</text></view>
+            </view>
+          </view>
+        </block>
+        <view class="empty-state" wx:else>
+          <view class="empty-icon">💬</view>
+          <text class="empty-text">暂无私聊记录</text>
+          <text class="empty-hint">可在核验详情页发起与采集者的私聊</text>
+        </view>
+      </view>
+
+      <view class="group-list" wx:if="{{activeTab === 'group'}}">
+        <view class="group-item" data-groupid="1" bindtap="onGroupChatTap">
+          <view class="group-icon collector">👥</view>
+          <view class="group-info">
+            <text class="group-name">采集者交流群</text>
+            <text class="group-desc">采集技巧、经验分享</text>
+          </view>
+          <text class="group-arrow">›</text>
+        </view>
+        <view class="group-item" data-groupid="2" bindtap="onGroupChatTap">
+          <view class="group-icon verifier">🔍</view>
+          <view class="group-info">
+            <text class="group-name">核验者交流群</text>
+            <text class="group-desc">核验标准、问题讨论</text>
+          </view>
+          <text class="group-arrow">›</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

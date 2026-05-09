@@ -3,6 +3,7 @@
 // 返回格式：{ code, message, data: { userInfo }, success }
 
 const { API } = require('../../config/api');
+const { Request } = require('../../config/request');
 
 Page({
   data: {
@@ -19,55 +20,31 @@ Page({
     this.fetchUserInfo();
   },
 
-  fetchUserInfo() {
-    const loginToken = wx.getStorageSync('loginToken');
-
-    if (!loginToken) {
-      wx.showToast({
-        title: '未登录，请先登录',
-        icon: 'none'
-      });
-      wx.navigateTo({
-        url: '/pages/index/index'
-      });
+  async fetchUserInfo() {
+    if (!wx.getStorageSync('loginToken')) {
+      wx.showToast({ title: '未登录，请先登录', icon: 'none' });
+      wx.navigateTo({ url: '/pages/index/index' });
       return;
     }
 
-    wx.request({
-      url: API.USER.GET_INFO,
-      method: 'GET',
-      header: {
-        'Authorization': 'Bearer ' + loginToken,
-        'Content-Type': 'application/json'
-      },
-      success: (resp) => {
-        const { success, message, data } = resp.data;
+    try {
+      const resp = await Request.get(API.USER.GET_INFO);
 
-        if (success && data) {
-          const userInfo = data.userInfo || data;
-          const nickname = userInfo.nickname || '未设置昵称';
-          const displayNickname = this.truncateNickname(nickname, 10);
+      if (resp.data) {
+        const userInfo = resp.data.userInfo || resp.data;
+        const nickname = userInfo.nickname || '未设置昵称';
+        const displayNickname = this.truncateNickname(nickname, 10);
 
-          wx.setStorageSync('userNickname', nickname);
+        wx.setStorageSync('userNickname', nickname);
 
-          this.setData({
-            user: userInfo,
-            displayNickname: displayNickname
-          });
-        } else {
-          wx.showToast({
-            title: message || '获取用户信息失败',
-            icon: 'none'
-          });
-        }
-      },
-      fail: () => {
-        wx.showToast({
-          title: '网络请求失败',
-          icon: 'none'
+        this.setData({
+          user: userInfo,
+          displayNickname: displayNickname
         });
       }
-    });
+    } catch (err) {
+      console.error('获取用户信息失败:', err);
+    }
   },
 
   truncateNickname(nickname, maxLength) {

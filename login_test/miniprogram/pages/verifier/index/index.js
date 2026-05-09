@@ -1,21 +1,20 @@
 // 核验者首页
 // 功能：展示核验者角色信息、统计数据和功能入口
+
 const { API } = require('../../../config/api');
+const { Request } = require('../../../config/request');
 
 Page({
   data: {
-    // 用户信息
     userInfo: {},
     displayNickname: '核验者',
 
-    // 统计数据
     stats: {
       pendingCount: 0,
-      todayVerified: 0,
-      approvalRate: 0
+      approvedCount: 0,
+      rejectedCount: 0
     },
 
-    // 功能入口列表
     functionList: [
       {
         id: 'verify-list',
@@ -41,23 +40,17 @@ Page({
       }
     ],
 
-    // 加载状态
     loading: true
   },
 
-  // 页面加载时触发
   onLoad() {
-    // 从缓存获取用户信息
     this.getUserInfo();
   },
 
-  // 页面显示时触发
   onShow() {
-    // 每次显示页面时刷新统计数据
     this.fetchStats();
   },
 
-  // 获取缓存中的用户信息
   getUserInfo() {
     const nickname = wx.getStorageSync('userNickname') || '核验者';
     const avatar = wx.getStorageSync('userAvatar') || '/images/avatar.png';
@@ -68,50 +61,29 @@ Page({
     });
   },
 
-  // 获取统计数据
-  fetchStats() {
+  async fetchStats() {
     this.setData({ loading: true });
 
-    wx.request({
-      url: API.VERIFIER.GET_STATS,
-      method: 'GET',
-      header: {
-        'Authorization': 'Bearer ' + wx.getStorageSync('loginToken') || ''
-      },
-      success: (res) => {
-        if (res.data.success) {
-          this.setData({
-            stats: res.data.data || {
-              pendingCount: 0,
-              todayVerified: 0,
-              approvalRate: 0
-            },
-            loading: false
-          });
+    try {
+      const res = await Request.get(API.SUBMISSION.PENDING_REVIEW, {}, true);
+      const pendingList = res.data || [];
 
-          // 更新列表角标
-          this.updateBadge();
-        } else {
-          this.setData({ loading: false });
-          console.error('获取统计数据失败:', res.data.message);
-        }
-      },
-      fail: (err) => {
-        this.setData({ loading: false });
-        console.error('网络请求失败:', err);
-        // 使用默认数据
-        this.setData({
-          stats: {
-            pendingCount: 0,
-            todayVerified: 0,
-            approvalRate: 0
-          }
-        });
-      }
-    });
+      this.setData({
+        stats: {
+          pendingCount: pendingList.length,
+          approvedCount: 0,
+          rejectedCount: 0
+        },
+        loading: false
+      });
+
+      this.updateBadge();
+    } catch (err) {
+      this.setData({ loading: false });
+      console.error('获取统计数据失败:', err);
+    }
   },
 
-  // 更新角标
   updateBadge() {
     const functionList = this.data.functionList.map(item => {
       if (item.id === 'verify-list') {
@@ -119,25 +91,18 @@ Page({
       }
       return item;
     });
-
     this.setData({ functionList });
   },
 
-  // 点击功能入口
-  onFunctionTap(e) {
-    const { path } = e.currentTarget.dataset;
-
-    // 检查权限（如果是地图视图，直接跳转）
+  navigateToFunction(e) {
+    const { id, path } = e.currentTarget.dataset;
     if (id === 'map') {
+      wx.switchTab({ url: path });
+    } else {
       wx.navigateTo({ url: path });
-      return;
     }
-
-    // 其他功能直接跳转
-    wx.navigateTo({ url: path });
   },
 
-  // 下拉刷新
   onPullDownRefresh() {
     this.fetchStats();
     setTimeout(() => {

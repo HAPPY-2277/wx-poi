@@ -2,26 +2,93 @@
 // 基于 API 文档的返回结构处理
 
 const { API } = require('./api');
+const { MOCK_ENABLED, RESPONSES } = require('./mock');
 
 const Request = {
   /**
+   * 获取 Mock 响应数据（支持动态路径匹配）
+   * @param {string} url 请求地址
+   * @param {Object} data 请求数据
+   * @returns {Object|null} Mock 响应数据
+   */
+  getMockResponse(url, data) {
+    if (!MOCK_ENABLED) return null;
+    const fullPath = url.replace(/^https?:\/\/[^/]+/, '');
+    const path = fullPath.split('?')[0];
+    console.log('[Mock] 请求路径:', path);
+
+    let mockData = RESPONSES[path];
+    if (mockData) {
+      console.log('[Mock] 直接匹配成功');
+      return typeof mockData === 'function' ? mockData(data) : mockData;
+    }
+
+    mockData = this.matchWildcardPath(path, Object.keys(RESPONSES));
+    if (mockData) {
+      console.log('[Mock] 通配符匹配成功');
+      const matchedKey = this.getMatchedKey(path, Object.keys(RESPONSES));
+      const originalData = RESPONSES[matchedKey];
+      return typeof originalData === 'function' ? originalData(data) : originalData;
+    }
+
+    console.log('[Mock] 未找到匹配的Mock数据');
+    return null;
+  },
+
+  /**
+   * 通配符路径匹配
+   * @param {string} path 请求路径
+   * @param {Array} keys Mock配置的keys
+   * @returns {string|null} 匹配的key
+   */
+  matchWildcardPath(path, keys) {
+    for (const key of keys) {
+      if (key.includes('*')) {
+        const regex = new RegExp('^' + key.replace(/\*/g, '[^/]+') + '$');
+        if (regex.test(path)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  },
+
+  /**
+   * 获取匹配的key
+   * @param {string} path 请求路径
+   * @param {Array} keys Mock配置的keys
+   * @returns {string|null} 匹配的key
+   */
+  getMatchedKey(path, keys) {
+    for (const key of keys) {
+      if (key.includes('*')) {
+        const regex = new RegExp('^' + key.replace(/\*/g, '[^/]+') + '$');
+        if (regex.test(path)) {
+          return key;
+        }
+      }
+    }
+    return null;
+  },
+
+  /**
    * 统一请求方法
-   * @param {Object} options 请求配置
-   * @param {string} options.url 请求地址
-   * @param {string} options.method 请求方法 (GET/POST/PUT/DELETE)
-   * @param {Object} options.data 请求数据
-   * @param {boolean} options.needAuth 是否需要认证 (默认 true)
-   * @returns {Promise} 返回 Promise 对象
    */
   request(options) {
     const { url, method = 'GET', data = {}, needAuth = true } = options;
+
+    const mockResponse = this.getMockResponse(url, data);
+    if (mockResponse) {
+      return new Promise((resolve) => {
+        setTimeout(() => resolve(mockResponse), 100);
+      });
+    }
 
     return new Promise((resolve, reject) => {
       const header = {
         'Content-Type': 'application/json'
       };
 
-      // 添加认证 token
       if (needAuth) {
         const loginToken = wx.getStorageSync('loginToken');
         if (loginToken) {
@@ -36,19 +103,18 @@ const Request = {
         header,
         success: (res) => {
           const response = res.data;
+          const adaptedResponse = this.adaptResponse(response);
 
-          // 根据 API 文档：以 success 字段作为主要判断依据
-          if (response.success) {
-            resolve(response);
+          if (adaptedResponse.success) {
+            resolve(adaptedResponse);
           } else {
-            // 显示错误提示
-            if (response.message) {
+            if (adaptedResponse.message) {
               wx.showToast({
-                title: response.message,
+                title: adaptedResponse.message,
                 icon: 'none'
               });
             }
-            reject(response);
+            reject(adaptedResponse);
           }
         },
         fail: (err) => {
@@ -63,51 +129,42 @@ const Request = {
   },
 
   /**
-   * GET 请求
+   * 适配两种返回格式
    */
+  adaptResponse(response) {
+    if (!response) return { success: false, code: 500, message: '未知错误' };
+
+    if (typeof response.success === 'boolean') {
+      return response;
+    }
+
+    if (typeof response.code === 'number') {
+      return {
+        success: response.code === 0,
+        code: 200,
+        message: response.msg || (response.code === 0 ? '成功' : '请求失败'),
+        data: response.data,
+        msg: response.msg
+      };
+    }
+
+    return response;
+  },
+
   get(url, data, needAuth = true) {
-    return this.request({
-      url,
-      method: 'GET',
-      data,
-      needAuth
-    });
+    return this.request({ url, method: 'GET', data, needAuth });
   },
 
-  /**
-   * POST 请求
-   */
   post(url, data, needAuth = true) {
-    return this.request({
-      url,
-      method: 'POST',
-      data,
-      needAuth
-    });
+    return this.request({ url, method: 'POST', data, needAuth });
   },
 
-  /**
-   * 登录请求
-   * @param {string} openid 微信用户唯一标识（通过云函数获取）
-   * @param {string} code 微信登录凭证
-   */
-  login(openid, code) {
-    return this.post(API.AUTH.LOGIN, { openid, code }, false);
+  login(code) {
+    return this.post(API.AUTH.LOGIN, { code }, false);
   },
 
-  /**
-   * 注册请求
-   * @param {Object} params 注册参数 { openid, code, nickname, avatarUrl }
-   */
   register(params) {
     return this.post(API.AUTH.REGISTER, params, false);
-  },
-
-  /**
-   * 获取用户信息
-   */
-  getUserInfo() {
-    return this.get(API.USER.GET_INFO, {}, true);
   }
 };
 

@@ -8,6 +8,12 @@ Component({
     this.updateSelected();
   },
 
+  pageLifetimes: {
+    show() {
+      this.updateSelected();
+    }
+  },
+
   methods: {
     updateSelected() {
       const pages = getCurrentPages();
@@ -15,12 +21,12 @@ Component({
       const route = currentPage.route;
 
       let selected = 0;
-      if (route.includes('collector')) {
+      if (route.includes('map')) {
+        selected = 0;
+      } else if (route.includes('chat')) {
         selected = 1;
-      } else if (route.includes('verifier')) {
+      } else if (route.includes('profile') || route.includes('index')) {
         selected = 2;
-      } else if (route.includes('map')) {
-        selected = 3;
       }
 
       this.setData({ selected });
@@ -30,14 +36,16 @@ Component({
       const index = Number(e.currentTarget.dataset.index);
       this.setData({ selected: index });
 
-      const routes = [
-        '/pages/index/index',
-        '/pages/collector/index/index',
-        '/pages/verifier/index/index',
-        '/pages/map/map'
-      ];
-
-      wx.switchTab({ url: routes[index] });
+      if (index === 1) {
+        // 聊天页
+        wx.switchTab({ url: '/pages/chat/chat' });
+      } else if (index === 2) {
+        // 个人页
+        wx.switchTab({ url: '/pages/index/index' });
+      } else {
+        // 地图页（index === 0）
+        wx.switchTab({ url: '/pages/map/map' });
+      }
     }
   }
 });

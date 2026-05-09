@@ -61,28 +61,43 @@
   </view>
 
   <!-- 功能入口区域 -->
-  <view class="function-section" style="width: 195rpx; height: 99rpx; display: block; box-sizing: border-box; left: 0rpx; top: 0rpx">
-    <view class="section-title" style="text-align: center">功能菜单</view>
+  <view class="function-section" style="height: 170rpx; display: block; box-sizing: border-box; color: aliceblue">
+    <!-- 功能菜单按钮 -->
+    <view class="menu-btn" bindtap="showMenu">
+      <text class="menu-btn-text">功能菜单</text>
+      <text class="menu-icon">☰</text>
+    </view>
+  </view>
 
-    <view class="function-entries">
-      <block wx:for="{{functionEntries}}" wx:key="id">
-        <view
-          class="function-card"
-          data-path="{{item.path}}"
-          bindtap="navigateToFunction"
-        >
-          <view class="card-icon">
-            <image src="{{item.icon}}" mode="aspectFit" />
+  <!-- 功能菜单弹窗 -->
+  <view class="menu-overlay" wx:if="{{showMenuPopup}}" bindtap="hideMenu">
+    <view class="menu-popup" catchtap="stopPropagation">
+      <view class="popup-header">
+        <text class="popup-title">功能菜单</text>
+        <view class="close-btn" bindtap="hideMenu">×</view>
+      </view>
+      <view class="menu-list">
+        <block wx:for="{{functionList}}" wx:key="id">
+          <view
+            class="menu-item"
+            data-id="{{item.id}}"
+            data-path="{{item.path}}"
+            bindtap="onMenuItemTap"
+          >
+            <view class="menu-item-icon">
+              <image src="{{item.icon}}" mode="aspectFit" />
+            </view>
+            <view class="menu-item-content">
+              <text class="menu-item-title">{{item.title}}</text>
+              <text class="menu-item-desc">{{item.desc}}</text>
+            </view>
+            <view class="menu-item-badge" wx:if="{{item.id === 'verify-list' && item.badge > 0}}">
+              <text class="badge-text">{{item.badge}}</text>
+            </view>
+            <text class="menu-arrow">›</text>
           </view>
-          <view class="card-content">
-            <text class="card-title">{{item.title}}</text>
-            <text class="card-description">{{item.description}}</text>
-          </view>
-          <view class="card-arrow">
-            <text class="arrow-icon">›</text>
-          </view>
-        </view>
-      </block>
+        </block>
+      </view>
     </view>
   </view>
 

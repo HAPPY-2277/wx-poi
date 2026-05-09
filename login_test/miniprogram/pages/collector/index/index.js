@@ -1,32 +1,23 @@
 // 采集者首页
 // 功能：展示采集者角色头部、统计数据卡片、功能入口卡片
-const { API } = require('../../../config/api');
 
-// 页面初始化数据
+const { API } = require('../../../config/api');
+const { Request } = require('../../../config/request');
+
 Page({
   data: {
-    // 用户信息
     userInfo: {
       nickname: '',
       avatar: ''
     },
-
-    // 统计数据
+    notLoggedIn: false,
     stats: {
-      newTasks: 0,       // 新任务数
-      pendingTasks: 0,   // 待处理任务数
-      myCollections: 0  // 我的采集数
+      totalPoi: 0,
+      approvedPoi: 0,
+      pendingPoi: 0,
+      pendingTask: 0
     },
-
-    // 功能入口列表
     functionList: [
-      {
-        id: 'new',
-        title: '新建采集',
-        icon: '/images/icons/add.png',
-        desc: '添加新的POI信息',
-        path: '/pages/collector/collect/index'
-      },
       {
         id: 'tasks',
         title: '任务列表',
@@ -50,109 +41,94 @@ Page({
         path: '/pages/map/map'
       }
     ],
-
-    // 加载状态
     loading: true
   },
 
-  // 页面加载时触发
   onLoad() {
-    // 从缓存获取用户信息
-    this.getUserInfo();
+    this.checkLoginStatus();
   },
 
-  // 页面显示时触发
   onShow() {
-    // 每次显示页面时刷新统计数据
-    this.fetchStats();
+    this.checkLoginStatus();
+    if (!this.data.notLoggedIn) {
+      this.fetchMyPOIStats();
+    }
   },
 
-  // 获取缓存中的用户信息
+  checkLoginStatus() {
+    const loginToken = wx.getStorageSync('loginToken');
+    const userRole = wx.getStorageSync('userRole');
+    const notLoggedIn = !loginToken || userRole !== 'collector';
+    this.setData({ notLoggedIn });
+
+    if (!notLoggedIn) {
+      this.getUserInfo();
+    }
+  },
+
   getUserInfo() {
     const nickname = wx.getStorageSync('userNickname');
     const avatar = wx.getStorageSync('userAvatar') || '/images/avatar.png';
-
     this.setData({
       'userInfo.nickname': nickname || '采集者',
       'userInfo.avatar': avatar
     });
   },
 
-  // 获取统计数据
-  fetchStats() {
+  async fetchMyPOIStats() {
     this.setData({ loading: true });
+    const userId = wx.getStorageSync('userId');
 
-    wx.request({
-      url: API.COLLECTOR.GET_STATS,
-      method: 'GET',
-      header: {
-        'Authorization': 'Bearer ' + (wx.getStorageSync('loginToken') || '')
-      },
-      success: (res) => {
-        if (res.data.success) {
-          this.setData({
-            stats: res.data.data || {
-              newTasks: 0,
-              pendingTasks: 0,
-              myCollections: 0
-            },
-            loading: false
-          });
+    try {
+      const res = await Request.get(API.POI.COLLECTOR_LIST(userId), {}, true);
+      const poiList = res.data || [];
 
-          // 更新任务列表角标
-          this.updateTaskBadge();
-        } else {
-          this.setData({ loading: false });
-          console.error('获取统计数据失败:', res.data.message);
-        }
-      },
-      fail: (err) => {
-        this.setData({ loading: false });
-        console.error('网络请求失败:', err);
-        // 使用默认数据
-        this.setData({
-          stats: {
-            newTasks: 0,
-            pendingTasks: 0,
-            myCollections: 0
-          }
-        });
-      }
-    });
+      const stats = {
+        totalPoi: poiList.length,
+        approvedPoi: poiList.filter(p => p.status === 'APPROVED' || p.isActive).length,
+        pendingPoi: poiList.filter(p => p.status === 'PENDING_REVIEW').length,
+        pendingTask: 0
+      };
+
+      this.setData({ stats, loading: false });
+      this.updateTaskBadge();
+    } catch (err) {
+      this.setData({ loading: false });
+      console.error('获取统计数据失败:', err);
+    }
   },
 
-  // 更新任务角标
   updateTaskBadge() {
     const functionList = this.data.functionList.map(item => {
       if (item.id === 'tasks') {
-        item.badge = this.data.stats.newTasks + this.data.stats.pendingTasks;
+        item.badge = this.data.stats.pendingTask;
       }
       return item;
     });
-
     this.setData({ functionList });
   },
 
-  // 点击功能入口
   onFunctionTap(e) {
-    const { path } = e.currentTarget.dataset;
-    const { id } = e.currentTarget.dataset;
-
-    // 检查权限（如果是地图视图，直接跳转）
+    const { path, id } = e.currentTarget.dataset;
     if (id === 'map') {
+      wx.switchTab({ url: path });
+    } else {
       wx.navigateTo({ url: path });
-      return;
     }
-
-    // 其他功能直接跳转
-    wx.navigateTo({ url: path });
   },
 
-  // 下拉刷新
   onPullDownRefresh() {
-    this.fetchStats();
+    if (this.data.notLoggedIn) {
+      wx.stopPullDownRefresh();
+      return;
+    }
+    this.fetchMyPOIStats();
     setTimeout(() => {
       wx.stopPullDownRefresh();
     }, 1000);
+  },
+
+  goToLogin() {
+    wx.switchTab({ url: '/pages/index/index' });
   }
 });

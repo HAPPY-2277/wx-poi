@@ -240,3 +240,56 @@
   font-weight: 600;
   color: #fff;
 }
+
+/* 异议处理区域 */
+.chat-section {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-top: 20rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+}
+
+.chat-actions {
+  display: flex;
+  gap: 20rpx;
+  margin-bottom: 20rpx;
+}
+
+.chat-btn, .objection-btn {
+  flex: 1;
+  height: 80rpx;
+  background: #07c160;
+  border-radius: 40rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+
+.objection-btn {
+  background: #e6a23c;
+}
+
+.chat-btn::after, .objection-btn::after {
+  border: none;
+}
+
+.chat-btn-text {
+  font-size: 28rpx;
+  color: #fff;
+  font-weight: 500;
+}
+
+.chat-hint {
+  padding: 16rpx;
+  background: #f9f9f9;
+  border-radius: 8rpx;
+}
+
+.hint-info {
+  font-size: 24rpx;
+  color: #999;
+}

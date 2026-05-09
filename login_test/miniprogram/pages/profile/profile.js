@@ -4,6 +4,8 @@
 // 返回格式：{ code, message, data: { isNewUser, loginToken }, success }
 
 const { API } = require('../../config/api');
+const { Request } = require('../../config/request');
+const app = getApp();
 
 Page({
   data: {
@@ -67,74 +69,70 @@ Page({
     });
   },
 
-  sendRegisterRequest(code) {
+  async sendRegisterRequest(code) {
     wx.showLoading({ title: '注册中...' });
 
-    wx.request({
-      url: API.AUTH.REGISTER,
-      method: 'POST',
-      header: {
-        'Content-Type': 'application/json'
-      },
-      data: {
+    try {
+      const resp = await Request.post(API.AUTH.REGISTER, {
         code: code,
         nickname: this.data.nickname,
         role: this.data.role
-      },
-      success: (resp) => {
-        wx.hideLoading();
-        const { success, message, data } = resp.data;
+      }, false);
 
-        if (success && data) {
-          wx.setStorageSync('loginToken', data.loginToken);
-          wx.setStorageSync('userNickname', this.data.nickname);
-          wx.setStorageSync('userRole', this.data.role);
+      wx.hideLoading();
 
-          const roleName = this.data.role === 'collector' ? '采集者' : '核验者';
-          wx.showToast({
-            title: message || `注册成功，您是${roleName}`,
-            icon: 'success'
-          });
+      if (resp.data) {
+        wx.setStorageSync('loginToken', resp.data.loginToken);
+        wx.setStorageSync('userNickname', this.data.nickname);
+        wx.setStorageSync('userRole', this.data.role);
+        if (resp.data.avatar) {
+          wx.setStorageSync('userAvatar', resp.data.avatar);
+        }
+        if (resp.data.userId) {
+          wx.setStorageSync('userId', resp.data.userId);
+        }
 
-          setTimeout(() => {
-            if (this.data.role === 'collector') {
-              wx.switchTab({
-                url: '/pages/collector/index/index'
-              });
-            } else {
-              wx.switchTab({
-                url: '/pages/verifier/index/index'
-              });
-            }
-          }, 1500);
-        } else {
-          wx.showToast({
-            title: message || '注册失败',
-            icon: 'none'
-          });
+        app.updateLoginStatus({
+          loginToken: resp.data.loginToken,
+          nickname: this.data.nickname,
+          role: this.data.role,
+          avatar: resp.data.avatar,
+          userId: resp.data.userId
+        });
 
-          if (message && message.includes('用户已存在')) {
-            wx.showModal({
-              title: '提示',
-              content: '用户已存在，是否去登录？',
-              success: (res) => {
-                if (res.confirm) {
-                  wx.navigateTo({
-                    url: '/pages/index/index'
-                  });
-                }
-              }
+        const roleName = this.data.role === 'collector' ? '采集者' : '核验者';
+        wx.showToast({
+          title: resp.message || `注册成功，您是${roleName}`,
+          icon: 'success'
+        });
+
+        setTimeout(() => {
+          if (this.data.role === 'collector') {
+            wx.switchTab({
+              url: '/pages/collector/index/index'
+            });
+          } else {
+            wx.switchTab({
+              url: '/pages/verifier/index/index'
             });
           }
-        }
-      },
-      fail: () => {
-        wx.hideLoading();
-        wx.showToast({
-          title: '网络请求失败',
-          icon: 'none'
+        }, 1500);
+      }
+    } catch (err) {
+      wx.hideLoading();
+      if (err.message && err.message.includes('用户已存在')) {
+        wx.showModal({
+          title: '提示',
+          content: '用户已存在，是否去登录？',
+          success: (res) => {
+            if (res.confirm) {
+              wx.navigateTo({
+                url: '/pages/index/index'
+              });
+            }
+          }
         });
       }
-    });
+    }
   }
 });

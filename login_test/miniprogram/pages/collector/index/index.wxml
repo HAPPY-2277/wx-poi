@@ -1,6 +1,16 @@
 <!-- 采集者首页 -->
 <view class="container">
 
+  <!-- 未登录提示视图 -->
+  <view class="not-logged-in-view" wx:if="{{notLoggedIn}}">
+    <view class="lock-icon">🔒</view>
+    <text class="lock-title">登录后使用完整功能</text>
+    <text class="lock-desc">请先在"个人"页面完成登录/注册操作</text>
+    <button class="login-btn" bindtap="goToLogin">前往登录</button>
+  </view>
+
+  <!-- 已登录的采集者内容 -->
+  <block wx:else>
   <!-- 角色头部信息 -->
   <view class="header" style="position: relative; left: 4rpx; top: 0rpx; width: 393rpx; height: 237rpx; display: block; box-sizing: border-box">
     <view class="user-info">
@@ -16,7 +26,7 @@
 
   <!-- 统计数据区域 -->
   <view class="stats-container">
-    <view class="stats-card" style="width: 495rpx; height: 272rpx; display: flex; box-sizing: border-box">
+    <view class="stats-card" style="width: 495rpx; height: 233rpx; display: flex; box-sizing: border-box">
       <!-- 新任务数 -->
       <view class="stat-item">
         <view class="stat-value">{{stats.newTasks}}</view>
@@ -24,7 +34,7 @@
       </view>
       <view class="stat-divider"></view>
       <!-- 待处理任务数 -->
-      <view class="stat-item">
+      <view class="stat-item" style="justify-self: center">
         <view class="stat-value">{{stats.pendingTasks}}</view>
         <view class="stat-label">待处理</view>
       </view>
@@ -97,5 +107,6 @@
   <view class="loading" wx:if="{{loading}}">
     <text>数据加载中...</text>
   </view>
+  </block>
 
 </view>

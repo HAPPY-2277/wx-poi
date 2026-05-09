@@ -1,0 +1,35 @@
+<view class="container">
+  <scroll-view class="message-list" scroll-y="true" scroll-top="{{scrollTop}}">
+    <view class="loading-tip" wx:if="{{loading}}">
+      <text>加载中...</text>
+    </view>
+    <view class="loading-tip" wx:if="{{!loading && !hasMore}}">
+      <text>没有更多消息了</text>
+    </view>
+    
+    <view class="message-item {{message.from_user_id === myUserId ? 'mine' : 'other'}}" 
+          wx:for="{{messages}}" wx:key="msg_uuid">
+      <view class="message-header" wx:if="{{message.from_user_id !== myUserId}}">
+        <text class="sender-name">{{message.from_nickname || '用户'}}</text>
+      </view>
+      <view class="message-content">
+        <text class="message-text">{{item.content}}</text>
+      </view>
+      <text class="message-time">{{item.created_at}}</text>
+    </view>
+  </scroll-view>
+
+  <view class="input-area" style="height: 130rpx; display: flex; box-sizing: border-box; left: 0rpx; top: 1319rpx">
+    <textarea style="height: 81rpx; display: block; box-sizing: border-box; left: 0rpx; top: 0rpx" 
+      class="message-input" 
+      value="{{inputContent}}" 
+      placeholder="输入消息..." 
+      bindinput="onInputChange"
+      adjust-position="true"
+      fixed="true"
+    />
+    <button class="send-btn" bindtap="sendMessage" style="width: 260rpx; display: flex; box-sizing: border-box; left: 0rpx; top: 0rpx">
+      <text>发送</text>
+    </button>
+  </view>
+</view>

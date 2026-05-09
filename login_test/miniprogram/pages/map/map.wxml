@@ -4,7 +4,7 @@
     <text class="user-name">{{userNickname}}</text>
   </view>
 
-  <!-- 地图容器 -->
+        <!-- 地图容器 -->
   <map
     id="myMap"
     class="map"
@@ -13,6 +13,10 @@
     longitude="{{longitude}}"
     scale="{{scale}}"
     show-location
+    enable-rotate="{{false}}"
+    enable-overlooking="{{false}}"
+    enable-satellite="{{false}}"
+    enable-traffic="{{false}}"
     bindmarkertap="onMarkerTap"
     bindregionchange="onRegionChange"
   ></map>

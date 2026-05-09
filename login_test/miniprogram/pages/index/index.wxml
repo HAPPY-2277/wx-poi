@@ -1,40 +1,74 @@
 <view class="container">
-  <!-- 顶部Logo区域 -->
-  <view class="logo-section">
-    <view class="logo-icon" style="width: 158rpx; height: 185rpx; display: block; box-sizing: border-box">📍</view>
-    <text class="app-name">POI采集核验</text>
-    <text class="app-desc">高效采集 · 精准核验 · 智能管理</text>
-  </view>
-
-  <!-- 用户信息展示区域 -->
-  <view class="user-section" wx:if="{{userInfo.logined}}">
-    <view class="user-card">
-      <image class="user-avatar" src="{{userInfo.avatar}}" mode="aspectFill" binderror="onAvatarError"/>
-      <view class="user-info">
-        <text class="user-name">{{userInfo.nickname}}</text>
-        <text class="user-role">{{userInfo.role === 'collector' ? '采集者' : '核验者'}}</text>
+  <!-- 已登录：显示用户信息 -->
+  <view class="profile-view" wx:if="{{userInfo.logined}}">
+    <!-- 顶部背景 -->
+    <view class="profile-header">
+      <image class="profile-avatar" src="{{userInfo.avatar}}" mode="aspectFill" binderror="onAvatarError"/>
+      <view class="profile-info">
+        <text class="profile-nickname">{{userInfo.nickname}}</text>
+        <view class="profile-role-badge">
+          <text class="role-text">{{userInfo.role === 'collector' ? '采集者' : '核验者'}}</text>
+        </view>
       </view>
     </view>
-  </view>
 
-  <!-- 登录区域 -->
-  <view class="login-section" style="height: 658rpx; display: flex; box-sizing: border-box">
-    <view class="login-card">
-      <text class="login-title">欢迎登录</text>
-      <text class="login-desc">点击下方按钮使用微信登录</text>
-      
-      <button class="login-btn" bindtap="handleLogin">
-        
-        <text class="btn-text">微信一键登录</text>
-      </button>
-      
-      <text class="login-tip">登录即表示同意《用户协议》和《隐私政策》</text>
+    <!-- 功能菜单 -->
+    <view class="menu-section" style="width: 520rpx; height: 514rpx; display: block; box-sizing: border-box">
+      <view class="menu-item" bindtap="goToFunction">
+        <text class="menu-icon">⚙️</text>
+        <text class="menu-title">功能</text>
+        <text class="menu-arrow">›</text>
+      </view>
+      <view class="menu-item" bindtap="onMenuTap" data-type="settings">
+        <text class="menu-icon">🔧</text>
+        <text class="menu-title">设置</text>
+        <text class="menu-arrow">›</text>
+      </view>
+      <view class="menu-item" bindtap="onMenuTap" data-type="about">
+        <text class="menu-icon">ℹ️</text>
+        <text class="menu-title">关于我们</text>
+        <text class="menu-arrow">›</text>
+      </view>
+      <view class="menu-item logout-item" bindtap="onLogout">
+        <text class="menu-icon">🚪</text>
+        <text class="menu-title">退出登录</text>
+        <text class="menu-arrow">›</text>
+      </view>
+    </view>
+
+    <!-- 版本信息 -->
+    <view class="footer">
+      <text class="version">v1.0.0</text>
     </view>
   </view>
 
-  <!-- 底部信息 -->
-  <view class="footer">
-    <text class="footer-text">POI数据采集及核验系统</text>
-    <text class="version">v1.0.0</text>
-  </view>
+  <!-- 未登录：显示登录页面 -->
+  <block wx:else>
+    <!-- 顶部Logo区域 -->
+    <view class="logo-section">
+      <view class="logo-icon">📍</view>
+      <text class="app-name">POI采集核验</text>
+      <text class="app-desc">高效采集 · 精准核验 · 智能管理</text>
+    </view>
+
+    <!-- 登录区域 -->
+    <view class="login-section">
+      <view class="login-card">
+        <text class="login-title">欢迎登录</text>
+        <text class="login-desc">点击下方按钮使用微信登录</text>
+        
+        <button class="login-btn" bindtap="handleLogin">
+          <text class="btn-text">微信一键登录</text>
+        </button>
+        
+        <text class="login-tip">登录即表示同意《用户协议》和《隐私政策》</text>
+      </view>
+    </view>
+
+    <!-- 底部信息 -->
+    <view class="footer">
+      <text class="footer-text">POI数据采集及核验系统</text>
+      <text class="version">v1.0.0</text>
+    </view>
+  </block>
 </view>

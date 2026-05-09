@@ -2,6 +2,9 @@
   "pages": [
     "pages/index/index",
     "pages/profile/profile",
+    "pages/chat/chat",
+    "pages/chat/private-chat/index",
+    "pages/chat/group-chat/index",
     "pages/collector/index/index",
     "pages/collector/collect/index",
     "pages/collector/task-list/index",
@@ -29,20 +32,16 @@
     "borderStyle": "black",
     "list": [
       {
-        "pagePath": "pages/index/index",
-        "text": "登录"
-      },
-      {
-        "pagePath": "pages/collector/index/index",
-        "text": "采集"
-      },
-      {
-        "pagePath": "pages/verifier/index/index",
-        "text": "核验"
-      },
-      {
         "pagePath": "pages/map/map",
         "text": "地图"
+      },
+      {
+        "pagePath": "pages/chat/chat",
+        "text": "聊天"
+      },
+      {
+        "pagePath": "pages/index/index",
+        "text": "个人"
       }
     ]
   },
