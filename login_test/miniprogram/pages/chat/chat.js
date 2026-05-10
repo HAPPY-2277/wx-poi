@@ -14,6 +14,7 @@ Page({
     userId: null,
     messages: [],
     unreadCount: 0,
+    systemUnreadCount: 0,
     activeTab: 'private',
     systemNotifications: [],
     privateChats: [],
@@ -65,18 +66,50 @@ Page({
     if (!this.data.currentUserId) return;
 
     try {
-      const res = await messageService.getUnreadMessages(this.data.currentUserId);
-      if (res.success) {
-        const unreadCount = res.data.length;
-        this.updateTabBarBadge(unreadCount);
+      const unreadRes = await messageService.getUnreadMessages(this.data.currentUserId);
+      if (unreadRes.success) {
+        const privateUnread = unreadRes.data.filter(m => m.msg_type === 'private');
+        const systemUnread = unreadRes.data.filter(m => m.msg_type === 'system');
+        
         this.setData({
-          unreadCount,
-          systemNotifications: res.data.filter(m => m.msg_type === 'system'),
-          privateChats: this.groupPrivateMessages(res.data.filter(m => m.msg_type === 'private'))
+          unreadCount: privateUnread.length,
+          systemUnreadCount: systemUnread.length,
+          privateChats: this.groupPrivateMessages(privateUnread)
+        });
+        this.updateTabBarBadge(unreadRes.data.length);
+      }
+      this.fetchSystemNotifications();
+    } catch (err) {
+      console.error('获取未读消息失败:', err);
+    }
+  },
+
+  async fetchSystemNotifications() {
+    if (!this.data.currentUserId) return;
+
+    try {
+      const res = await messageService.getSystemHistory(this.data.currentUserId, 50, 0);
+      if (res.success) {
+        this.setData({ systemNotifications: res.data });
+      }
+    } catch (err) {
+      console.error('获取系统通知历史失败:', err);
+    }
+  },
+
+  async loadMoreSystemNotifications() {
+    if (!this.data.currentUserId) return;
+
+    try {
+      const offset = this.data.systemNotifications.length;
+      const res = await messageService.getSystemHistory(this.data.currentUserId, 50, offset);
+      if (res.success && res.data.length > 0) {
+        this.setData({
+          systemNotifications: [...this.data.systemNotifications, ...res.data]
         });
       }
     } catch (err) {
-      console.error('获取未读消息失败:', err);
+      console.error('加载更多系统通知失败:', err);
     }
   },
 
@@ -115,14 +148,15 @@ Page({
     if (message.msg_type === 'private') {
       const unreadCount = this.data.unreadCount + 1;
       this.setData({ unreadCount });
-      this.updateTabBarBadge(unreadCount);
+      this.updateTabBarBadge(unreadCount + this.data.systemUnreadCount);
     } else if (message.msg_type === 'system') {
       const notifications = [message, ...this.data.systemNotifications];
+      const systemUnreadCount = this.data.systemUnreadCount + 1;
       this.setData({ 
         systemNotifications: notifications,
-        unreadCount: this.data.unreadCount + 1
+        systemUnreadCount: systemUnreadCount
       });
-      this.updateTabBarBadge(this.data.unreadCount);
+      this.updateTabBarBadge(this.data.unreadCount + systemUnreadCount);
     }
 
     wx.showToast({
@@ -160,6 +194,18 @@ Page({
     const { index } = e.currentTarget.dataset;
     const notification = this.data.systemNotifications[index];
     if (notification) {
+      const wasUnread = !notification.is_read;
+      this.setData({
+        systemNotifications: this.data.systemNotifications.map((n, i) => 
+          i === index ? { ...n, is_read: 1 } : n
+        )
+      });
+      if (wasUnread) {
+        messageService.markAsRead([notification.msg_uuid]);
+        const newSystemUnread = Math.max(0, this.data.systemUnreadCount - 1);
+        this.setData({ systemUnreadCount: newSystemUnread });
+        this.updateTabBarBadge(this.data.unreadCount + newSystemUnread);
+      }
       wx.showModal({
         title: '系统通知',
         content: notification.content,

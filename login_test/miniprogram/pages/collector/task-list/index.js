@@ -1,5 +1,5 @@
 // 任务列表页面
-// 功能：展示待采集的任务列表，支持按状态筛选，点击查看详情
+// 功能：展示待采集的任务列表，支持按状态筛选，提供导航和提交功能
 
 const { API } = require('../../../config/api');
 const { Request } = require('../../../config/request');
@@ -8,8 +8,21 @@ const { Request } = require('../../../config/request');
 const STATUS_MAP = {
   PENDING_COLLECTION: { label: '待采集', color: '#f59e0b', icon: '⏰' },
   PENDING_REVIEW: { label: '审核中', color: '#3b82f6', icon: '🔄' },
-  COMPLETED: { label: '已完成', color: '#10b981', icon: '✓' },
-  REJECTED: { label: '已驳回', color: '#ef4444', icon: '❌' }
+  COMPLETED: { label: '已完成', color: '#10b981', icon: '✓' }
+};
+
+// POI分类映射
+const CATEGORY_MAP = {
+  catering: '餐饮',
+  shopping: '购物',
+  life_service: '生活服务',
+  entertainment: '休闲娱乐',
+  hotel: '酒店住宿',
+  scenic: '旅游景点',
+  medical: '医疗健康',
+  education: '教育培训',
+  transport: '交通设施',
+  other: '其他'
 };
 
 Page({
@@ -59,7 +72,7 @@ Page({
 
     const userId = wx.getStorageSync('userId');
     if (!userId) {
-      this.setData({ loading: false });
+      this.setData({ loading: false, notLoggedIn: true });
       return;
     }
 
@@ -67,9 +80,13 @@ Page({
       const res = await Request.get(API.TASK.COLLECTOR_LIST(userId), {}, true);
       let taskList = res.data || [];
 
+      // 应用状态筛选
       if (this.data.filterStatus !== 'all') {
         taskList = taskList.filter(t => t.status === this.data.filterStatus);
       }
+
+      // 处理任务数据，兼容新旧字段格式
+      taskList = taskList.map(task => this.processTaskData(task));
 
       this.setData({
         taskList: refresh ? taskList : [...this.data.taskList, ...taskList],
@@ -80,9 +97,25 @@ Page({
     } catch (err) {
       this.setData({ loading: false });
       console.error('加载任务列表失败:', err);
+      wx.showToast({ title: '加载失败，请重试', icon: 'none' });
     }
   },
 
+  // 处理任务数据，兼容新旧字段
+  processTaskData(task) {
+    return {
+      ...task,
+      taskType: task.taskType || (task.type === 'update' ? 'UPDATE_EXISTING' : 'CREATE_NEW'),
+      createdAt: task.createdAt || task.createTime,
+      targetAddress: task.targetAddress || task.address,
+      targetName: task.targetName || task.name,
+      targetCategory: task.targetCategory || task.category,
+      targetLongitude: task.targetLongitude || task.longitude,
+      targetLatitude: task.targetLatitude || task.latitude
+    };
+  },
+
+  // 筛选状态变更
   onFilterChange(e) {
     const status = e.currentTarget.dataset.status;
     this.setData({
@@ -94,23 +127,85 @@ Page({
     this.loadTasks(true);
   },
 
-  onTaskTap(e) {
-    const taskId = e.currentTarget.dataset.id;
-    wx.navigateTo({
-      url: `/pages/collector/collect/index?taskId=${taskId}`
-    });
-  },
-
+  // 获取状态信息
   getStatusInfo(status) {
     return STATUS_MAP[status] || { label: '未知', color: '#999999', icon: '?' };
   },
 
+  // 获取分类名称
+  getCategoryName(category) {
+    return CATEGORY_MAP[category] || category || '';
+  },
+
+  // 格式化时间
   formatTime(timestamp) {
     if (!timestamp) return '';
     const date = new Date(timestamp);
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    const hour = String(date.getHours()).padStart(2, '0');
+    const minute = String(date.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day} ${hour}:${minute}`;
+  },
+
+  // 导航按钮点击
+  onNavigate(e) {
+    const task = e.currentTarget.dataset.task;
+
+    // 检查是否有有效的坐标
+    if (!task.targetLongitude || !task.targetLatitude) {
+      wx.showToast({ title: '暂无位置信息', icon: 'none' });
+      return;
+    }
+
+    const latitude = parseFloat(task.targetLatitude);
+    const longitude = parseFloat(task.targetLongitude);
+    const name = task.targetName || '目标位置';
+    const address = task.targetAddress || '';
+
+    // 调用微信导航功能
+    wx.openLocation({
+      latitude: latitude,
+      longitude: longitude,
+      name: name,
+      address: address,
+      scale: 18,
+      success: () => {
+        console.log('导航成功');
+      },
+      fail: (err) => {
+        console.error('导航失败:', err);
+        wx.showToast({ title: '导航失败，请检查位置信息', icon: 'none' });
+      }
+    });
+  },
+
+  // 提交按钮点击
+  onSubmit(e) {
+    const task = e.currentTarget.dataset.task;
+    const taskId = e.currentTarget.dataset.taskid;
+
+    // 检查任务状态
+    if (task.status !== 'PENDING_COLLECTION') {
+      const statusText = task.status === 'PENDING_REVIEW' ? '审核中' : '已完成';
+      wx.showToast({ title: `任务${statusText}，无法提交`, icon: 'none' });
+      return;
+    }
+
+    // 跳转到采集页面进行提交
+    wx.navigateTo({
+      url: `/pages/collector/collect/index?taskId=${taskId}`
+    });
+  },
+
+  // 点击任务项查看详情（保留原有功能）
+  onTaskTap(e) {
+    const taskId = e.currentTarget.dataset.id;
+    if (taskId) {
+      wx.navigateTo({
+        url: `/pages/collector/collect/index?taskId=${taskId}`
+      });
+    }
   }
 });

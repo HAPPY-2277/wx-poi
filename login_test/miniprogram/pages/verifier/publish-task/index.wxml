@@ -1,0 +1,192 @@
+<!-- 发布任务页面 -->
+<view class="container">
+
+  <!-- 表单区域 -->
+  <view class="form-container" style="width: 570rpx; height: 1347rpx; display: block; box-sizing: border-box">
+
+    <!-- 目标名称 -->
+    <view class="form-item {{errors.targetName ? 'error' : ''}}">
+      <view class="form-label">目标名称 <text class="required">*</text></view>
+      <input
+        class="form-input"
+        placeholder="请输入采集目标名称"
+        value="{{formData.targetName}}"
+        bindinput="onNameInput"
+        maxlength="50"
+      />
+      <view class="error-tip" wx:if="{{errors.targetName}}">{{errors.targetName}}</view>
+    </view>
+
+    <!-- 目标分类 -->
+    <view class="form-item {{errors.targetCategory ? 'error' : ''}}" bindtap="showCategorySelector">
+      <view class="form-label">目标分类 <text class="required">*</text></view>
+      <view class="form-value {{selectedCategory ? '' : 'placeholder'}}">
+        <text class="category-icon" wx:if="{{selectedCategory}}">{{selectedCategory.icon}}</text>
+        {{selectedCategory ? selectedCategory.name : '请选择目标分类'}}
+        <text class="arrow">›</text>
+      </view>
+      <view class="error-tip" wx:if="{{errors.targetCategory}}">{{errors.targetCategory}}</view>
+    </view>
+
+    <!-- 目标地址（带关键词提示） -->
+    <view class="form-item {{errors.targetAddress ? 'error' : ''}}">
+      <view class="form-label">目标地址 <text class="required">*</text></view>
+      <view class="address-input-wrapper">
+        <input
+          class="form-input address-input {{errors.targetAddress ? 'input-error' : ''}}"
+          placeholder="输入地址关键词"
+          value="{{formData.targetAddress}}"
+          bindinput="onAddressInput"
+          bindfocus="onAddressFocus"
+          maxlength="200"
+        />
+        <view class="clear-btn" wx:if="{{formData.targetAddress}}" bindtap="clearAddress">
+          <text>×</text>
+        </view>
+      </view>
+      <!-- 地址建议下拉列表 -->
+      <view class="suggestion-dropdown" wx:if="{{showAddressSuggestions && addressSuggestions.length > 0}}">
+        <view 
+          class="suggestion-item"
+          wx:for="{{addressSuggestions}}"
+          wx:key="id"
+          bindtap="onSelectAddress"
+          data-item="{{item}}"
+        >
+          <text class="item-title">{{item.title}}</text>
+          <text class="item-address">{{item.address}}</text>
+        </view>
+      </view>
+      <view class="error-tip" wx:if="{{errors.targetAddress}}">{{errors.targetAddress}}</view>
+    </view>
+
+    <!-- 分配采集者 -->
+    <view class="form-item collector-form-item" bindtap="showCollectorSelector">
+      <view class="form-label">分配采集者 <text class="optional">(选填)</text></view>
+      <view class="collector-display">
+        <view class="collector-tags" wx:if="{{selectedCollectors.length > 0}}">
+          <block wx:for="{{collectors}}" wx:key="id">
+            <view class="collector-tag selected" wx:if="{{selectedCollectors.indexOf(item.id) > -1}}">
+              <view class="tag-avatar-wrapper">
+                <image class="tag-avatar" src="/images/icons/avatar.png" mode="aspectFill"></image>
+                <view class="tag-online-dot {{item.isOnline ? 'online' : 'offline'}}"></view>
+              </view>
+              <text class="tag-name">{{item.nickname}}</text>
+              <view class="tag-remove" catchtap="onRemoveCollector" data-id="{{item.id}}">×</view>
+            </view>
+          </block>
+        </view>
+        <view class="collector-empty" wx:if="{{selectedCollectors.length === 0}}">
+          <text class="placeholder">点击选择采集者（可多选）</text>
+        </view>
+        <text class="arrow">›</text>
+      </view>
+      <view class="selected-count" wx:if="{{selectedCollectors.length > 0}}">
+        已选择 {{selectedCollectors.length}} 人
+      </view>
+    </view>
+
+    <!-- 任务描述 -->
+    <view class="form-item" style="width: 512rpx; height: 345rpx; display: block; box-sizing: border-box">
+      <view class="form-label">任务描述</view>
+      <textarea style="width: 454rpx; height: 252rpx; display: block; box-sizing: border-box; left: 0rpx; top: 0rpx"
+        class="form-textarea"
+        placeholder="请输入任务详细描述（选填）"
+        value="{{formData.description}}"
+        bindinput="onDescriptionInput"
+        maxlength="500"
+      />
+    </view>
+
+  </view>
+
+  <!-- 提交按钮 -->
+  <view class="submit-container">
+    <button
+      class="submit-btn gradient-btn"
+      bindtap="submitForm"
+      loading="{{submitting}}"
+      disabled="{{submitting}}"
+    >
+      {{submitting ? '发布中...' : '发布任务'}}
+    </button>
+  </view>
+
+  <!-- 分类选择器 -->
+  <view class="picker-mask {{showCategoryPicker ? 'show' : ''}}" bindtap="hideCategorySelector">
+    <view class="picker-content {{showCategoryPicker ? 'show' : ''}}" catchtap="preventBubble">
+      <view class="picker-header">
+        <text class="picker-title">选择目标分类</text>
+        <text class="picker-close" bindtap="hideCategorySelector">×</text>
+      </view>
+      <view class="picker-body">
+        <view
+          class="category-item"
+          wx:for="{{categories}}"
+          wx:key="id"
+          bindtap="onSelectCategory"
+          data-id="{{item.id}}"
+        >
+          <text class="category-icon">{{item.icon}}</text>
+          <text class="category-name">{{item.name}}</text>
+          <text class="category-check" wx:if="{{formData.targetCategory === item.id}}">✓</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 采集者选择器 -->
+  <view class="picker-mask {{showCollectorPicker ? 'show' : ''}}" bindtap="hideCollectorSelector">
+    <view class="picker-content picker-content-wide {{showCollectorPicker ? 'show' : ''}}" catchtap="preventBubble">
+      <view class="picker-header">
+        <view class="header-left">
+          <text class="picker-title">选择采集者</text>
+          <text class="header-tip" wx:if="{{selectedCollectors.length > 0}}">已选 {{selectedCollectors.length}} 人</text>
+        </view>
+        <text class="picker-close" bindtap="hideCollectorSelector">×</text>
+      </view>
+      <view class="collector-list">
+        <block wx:if="{{collectorsLoading}}">
+          <view class="loading-tip">加载中...</view>
+        </block>
+        <block wx:elif="{{collectors.length === 0}}">
+          <view class="empty-tip">暂无可分配的采集者</view>
+        </block>
+        <block wx:else>
+          <view
+            class="collector-item {{selectedCollectors.indexOf(item.id) > -1 ? 'selected' : ''}}"
+            wx:for="{{collectors}}"
+            wx:key="id"
+            bindtap="onToggleCollector"
+            data-id="{{item.id}}"
+          >
+            <view class="collector-avatar-wrapper">
+              <image class="collector-avatar" src="/images/icons/avatar.png" mode="aspectFill"></image>
+              <view class="online-indicator {{item.isOnline ? 'online' : 'offline'}}"></view>
+            </view>
+            <view class="collector-info">
+              <view class="info-main">
+                <text class="collector-name">{{item.nickname}}</text>
+                <text class="collector-role">采集者</text>
+              </view>
+              <text class="collector-status {{item.isOnline ? 'online' : 'offline'}}">
+                {{item.isOnline ? '在线' : '离线'}}
+              </text>
+            </view>
+            <view class="collector-check {{selectedCollectors.indexOf(item.id) > -1 ? 'checked' : ''}}">
+              <text wx:if="{{selectedCollectors.indexOf(item.id) > -1}}">✓</text>
+            </view>
+          </view>
+        </block>
+      </view>
+      <view class="picker-footer">
+        <view class="footer-info">
+          <text wx:if="{{selectedCollectors.length > 0}}">已选择 {{selectedCollectors.length}} 位采集者</text>
+          <text wx:else>请选择采集者（可多选）</text>
+        </view>
+        <button class="confirm-btn {{selectedCollectors.length > 0 ? 'has-selection' : ''}}" bindtap="confirmCollectorSelection">确定</button>
+      </view>
+    </view>
+  </view>
+
+</view>

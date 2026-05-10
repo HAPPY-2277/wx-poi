@@ -19,16 +19,15 @@
     </view>
   </scroll-view>
 
-  <view class="input-area" style="height: 130rpx; display: flex; box-sizing: border-box; left: 0rpx; top: 1319rpx">
-    <textarea style="height: 81rpx; display: block; box-sizing: border-box; left: 0rpx; top: 0rpx" 
-      class="message-input" 
+  <view class="input-area">
+    <textarea class="message-input" 
       value="{{inputContent}}" 
       placeholder="输入消息..." 
       bindinput="onInputChange"
       adjust-position="true"
       fixed="true"
     />
-    <button class="send-btn" bindtap="sendMessage" style="width: 260rpx; display: flex; box-sizing: border-box; left: 0rpx; top: 0rpx">
+    <button class="send-btn" bindtap="sendMessage">
       <text>发送</text>
     </button>
   </view>

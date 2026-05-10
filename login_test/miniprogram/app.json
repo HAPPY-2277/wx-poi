@@ -13,6 +13,7 @@
     "pages/verifier/verify-list/index",
     "pages/verifier/verify-detail/index",
     "pages/verifier/my-review/index",
+    "pages/verifier/publish-task/index",
     "pages/map/map",
     "pages/home/home",
     "pages/example/index"

@@ -51,12 +51,12 @@
           <text wx:else class="location-placeholder">请获取GPS位置</text>
         </view>
         <button
-          class="location-btn"
+          class="location-btn gradient-btn"
           bindtap="getLocation"
           loading="{{gettingLocation}}"
           disabled="{{gettingLocation}}"
         >
-          {{gettingLocation ? '定位中...' : '获取位置'}}
+          {{gettingLocation ? '定位中...' : '获取POI位置'}}
         </button>
       </view>
       <view class="error-tip" wx:if="{{errors.location}}">{{errors.location}}</view>

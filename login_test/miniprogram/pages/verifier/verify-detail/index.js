@@ -12,7 +12,13 @@ Page({
     selectedAction: null,
     reviewComment: '',
     isSubmitting: false,
-    submissionId: null
+    submissionId: null,
+    actionOptions: [
+      { id: 'approved', label: '通过', icon: '✓', color: '#07c160' },
+      { id: 'rejected', label: '不通过', icon: '✗', color: '#f56c6c' }
+    ],
+    showErrorDescription: false,
+    errorDescription: ''
   },
 
   onLoad(options) {
@@ -26,7 +32,15 @@ Page({
     }
   },
 
+  onShow() {
+    // 每次显示页面时刷新数据
+    if (this.data.submissionId && Object.keys(this.data.submissionDetail).length) {
+      this.fetchSubmissionDetail(this.data.submissionId);
+    }
+  },
+
   async fetchSubmissionDetail(id) {
+    this.setData({ isLoading: true });
     wx.showLoading({ title: '加载中...' });
 
     try {
@@ -42,6 +56,7 @@ Page({
       wx.showToast({ title: '加载失败', icon: 'none' });
     } finally {
       wx.hideLoading();
+      this.setData({ isLoading: false });
     }
   },
 
@@ -59,7 +74,14 @@ Page({
 
   onActionSelect(e) {
     const { action } = e.currentTarget.dataset;
-    this.setData({ selectedAction: action });
+    this.setData({
+      selectedAction: action,
+      showErrorDescription: action === 'rejected'
+    });
+  },
+
+  onErrorDescriptionInput(e) {
+    this.setData({ errorDescription: e.detail.value });
   },
 
   onReviewCommentInput(e) {
@@ -72,7 +94,7 @@ Page({
       return;
     }
 
-    if (this.data.selectedAction === 'rejected' && !this.data.reviewComment.trim()) {
+    if (this.data.selectedAction === 'rejected' && !this.data.errorDescription.trim()) {
       wx.showToast({ title: '请填写驳回原因', icon: 'none' });
       return;
     }
@@ -93,18 +115,18 @@ Page({
     wx.showLoading({ title: '提交中...' });
 
     const userId = wx.getStorageSync('userId');
-    const { submissionId, selectedAction, reviewComment } = this.data;
+    const { submissionId, selectedAction, errorDescription } = this.data;
 
     try {
       if (selectedAction === 'approved') {
         await Request.post(API.SUBMISSION.APPROVE(submissionId), {
           reviewerId: userId,
-          reviewComment: reviewComment || '审核通过'
+          reviewComment: '审核通过'
         }, true);
       } else {
         await Request.post(API.SUBMISSION.REJECT(submissionId), {
           reviewerId: userId,
-          reviewComment: reviewComment || '审核驳回'
+          reviewComment: errorDescription || '审核驳回'
         }, true);
       }
 

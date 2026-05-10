@@ -1,6 +1,7 @@
 {
-  "usingComponents": {},
   "navigationBarTitleText": "核验者中心",
-  "enablePullDownRefresh": true,
-  "backgroundTextStyle": "dark"
+  "navigationBarBackgroundColor": "#07c160",
+  "navigationBarTextStyle": "white",
+  "backgroundColor": "#f5f5f5",
+  "enablePullDownRefresh": true
 }

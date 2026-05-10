@@ -116,12 +116,9 @@
 
 /* 位置按钮 */
 .location-btn {
-  width: 180rpx;
+  width: 220rpx;
   height: 70rpx;
-  background-color: #07c160;
-  color: #ffffff;
   font-size: 26rpx;
-  border: none;
   border-radius: 8rpx;
   display: flex;
   align-items: center;
@@ -130,7 +127,14 @@
   margin: 0;
 }
 
-.location-btn::after {
+.gradient-btn {
+  background: linear-gradient(135deg, #07c160 0%, #10b981 100%);
+  color: #ffffff;
+  border: none;
+  font-weight: 600;
+}
+
+.gradient-btn::after {
   border: none;
 }
 

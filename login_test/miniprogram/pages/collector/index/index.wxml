@@ -12,7 +12,7 @@
   <!-- 已登录的采集者内容 -->
   <block wx:else>
   <!-- 角色头部信息 -->
-  <view class="header" style="position: relative; left: -10rpx; top: 0rpx; width: 352rpx; height: 237rpx; display: block; box-sizing: border-box">
+  <view class="header">
     <view class="user-info">
       <!-- 用户头像 -->
       <image class="avatar" src="{{userInfo.avatar}}" mode="aspectFill"></image>
@@ -25,8 +25,8 @@
   </view>
 
   <!-- 统计数据区域 -->
-  <view class="stats-container" style="width: 577rpx; height: 237rpx; display: block; box-sizing: border-box">
-    <view class="stats-card" style="width: 495rpx; height: 208rpx; display: flex; box-sizing: border-box">
+  <view class="stats-container">
+    <view class="stats-card" style="width: 447rpx; height: 110rpx; display: flex; box-sizing: border-box">
       <!-- 新任务数 -->
       <view class="stat-item">
         <view class="stat-value">{{stats.newTasks}}</view>
@@ -34,7 +34,7 @@
       </view>
       <view class="stat-divider"></view>
       <!-- 待处理任务数 -->
-      <view class="stat-item" style="justify-self: center">
+      <view class="stat-item">
         <view class="stat-value">{{stats.pendingTasks}}</view>
         <view class="stat-label">待处理</view>
       </view>
@@ -48,20 +48,9 @@
   </view>
 
   <!-- 功能入口区域 -->
-  <view class="function-container" style="width: 650rpx; height: 693rpx; display: block; box-sizing: border-box">
+  <view class="function-container">
     <view class="section-title">功能入口</view>
     <view class="function-grid">
-
-      <!-- 新建采集 -->
-      <view class="function-card" bindtap="onFunctionTap" data-id="new" data-path="{{functionList[0].path}}">
-        <view class="card-icon new-icon">
-          <image src="/images/icons/add.png" mode="aspectFit"></image>
-        </view>
-        <view class="card-content">
-          <text class="card-title">{{functionList[0].title}}</text>
-          <text class="card-desc">{{functionList[0].desc}}</text>
-        </view>
-      </view>
 
       <!-- 任务列表 -->
       <view class="function-card" bindtap="onFunctionTap" data-id="tasks" data-path="{{functionList[1].path}}">

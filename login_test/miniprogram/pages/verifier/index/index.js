@@ -1,21 +1,29 @@
 // 核验者首页
-// 功能：展示核验者角色信息、统计数据和功能入口
+// 功能：展示核验者角色头部、统计数据卡片、功能入口卡片
 
 const { API } = require('../../../config/api');
 const { Request } = require('../../../config/request');
 
 Page({
   data: {
-    userInfo: {},
-    displayNickname: '核验者',
-
+    userInfo: {
+      nickname: '',
+      avatar: ''
+    },
+    notLoggedIn: false,
     stats: {
       pendingCount: 0,
-      approvedCount: 0,
-      rejectedCount: 0
+      todayVerified: 0,
+      approvalRate: 0
     },
-
     functionList: [
+      {
+        id: 'publish-task',
+        title: '发布任务',
+        icon: '/images/icons/task.png',
+        desc: '发布POI采集任务',
+        path: '/pages/verifier/publish-task/index'
+      },
       {
         id: 'verify-list',
         title: '审核列表',
@@ -39,24 +47,36 @@ Page({
         path: '/pages/map/map'
       }
     ],
-
     loading: true
   },
 
   onLoad() {
-    this.getUserInfo();
+    this.checkLoginStatus();
   },
 
   onShow() {
-    this.fetchStats();
+    this.checkLoginStatus();
+    if (!this.data.notLoggedIn) {
+      this.fetchStats();
+    }
+  },
+
+  checkLoginStatus() {
+    const loginToken = wx.getStorageSync('loginToken');
+    const userRole = wx.getStorageSync('userRole');
+    const notLoggedIn = !loginToken || userRole !== 'verifier';
+    this.setData({ notLoggedIn });
+
+    if (!notLoggedIn) {
+      this.getUserInfo();
+    }
   },
 
   getUserInfo() {
-    const nickname = wx.getStorageSync('userNickname') || '核验者';
+    const nickname = wx.getStorageSync('userNickname');
     const avatar = wx.getStorageSync('userAvatar') || '/images/avatar.png';
-
     this.setData({
-      displayNickname: nickname,
+      'userInfo.nickname': nickname || '核验者',
       'userInfo.avatar': avatar
     });
   },
@@ -71,8 +91,8 @@ Page({
       this.setData({
         stats: {
           pendingCount: pendingList.length,
-          approvedCount: 0,
-          rejectedCount: 0
+          todayVerified: 0,
+          approvalRate: 0
         },
         loading: false
       });
@@ -94,8 +114,8 @@ Page({
     this.setData({ functionList });
   },
 
-  navigateToFunction(e) {
-    const { id, path } = e.currentTarget.dataset;
+  onFunctionTap(e) {
+    const { path, id } = e.currentTarget.dataset;
     if (id === 'map') {
       wx.switchTab({ url: path });
     } else {
@@ -104,9 +124,17 @@ Page({
   },
 
   onPullDownRefresh() {
+    if (this.data.notLoggedIn) {
+      wx.stopPullDownRefresh();
+      return;
+    }
     this.fetchStats();
     setTimeout(() => {
       wx.stopPullDownRefresh();
     }, 1000);
+  },
+
+  goToLogin() {
+    wx.switchTab({ url: '/pages/index/index' });
   }
 });

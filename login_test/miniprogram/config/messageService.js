@@ -172,6 +172,11 @@ function cacheMessage(message) {
       messageCache.group[to_id] = [];
     }
     messageCache.group[to_id].push(message);
+  } else if (msg_type === 'system') {
+    if (!messageCache.system) {
+      messageCache.system = [];
+    }
+    messageCache.system.unshift(message);
   }
 }
 
@@ -328,6 +333,32 @@ async function getGroupHistory(groupId, limit = 50, offset = 0) {
     }
   } catch (err) {
     console.error('[MessageService] 获取群聊历史失败:', err);
+    return { success: false, data: [] };
+  }
+}
+
+/**
+ * 获取系统通知历史记录
+ * @param {number} userId 用户ID
+ * @param {number} limit 每页条数，默认 50
+ * @param {number} offset 偏移量，默认 0
+ * @returns {Promise} 返回系统通知列表
+ */
+async function getSystemHistory(userId, limit = 50, offset = 0) {
+  try {
+    const res = await request({
+      url: API.MSG.GET_SYSTEM(userId, limit, offset),
+      method: 'GET',
+      needAuth: false
+    });
+
+    if (res.success) {
+      return { success: true, data: res.data || [] };
+    } else {
+      return { success: false, data: [] };
+    }
+  } catch (err) {
+    console.error('[MessageService] 获取系统通知历史失败:', err);
     return { success: false, data: [] };
   }
 }
@@ -611,6 +642,7 @@ module.exports = {
   sendSystemNotify,
   sendVerifyNotify,
   getUnreadMessages,
+  getSystemHistory,
   markAsRead,
   getPrivateHistory,
   getGroupHistory,

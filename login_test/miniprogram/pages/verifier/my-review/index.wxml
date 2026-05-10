@@ -37,16 +37,16 @@
   </view>
 
   <!-- 筛选工具栏 -->
-  <view class="filter-toolbar" style="width: 670rpx; height: 104rpx; display: flex; box-sizing: border-box">
+  <view class="filter-toolbar" style="width: 572rpx; height: 89rpx; display: flex; box-sizing: border-box">
     <text class="filter-label">筛选</text>
     <view class="filter-options">
-      <text
+      <text 
         wx:for="{{filterOptions}}"
         wx:key="id"
         class="filter-tag {{filters.result === item.id ? 'active' : ''}}"
         data-result="{{item.id}}"
         bindtap="onFilterChange"
-      >{{item.name}}</text>
+       style="position: relative; left: 45rpx; top: 0rpx">{{item.label}}</text>
     </view>
   </view>
 

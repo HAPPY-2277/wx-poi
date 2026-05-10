@@ -29,33 +29,33 @@
   <view class="info-section">
     <view class="info-card">
       <view class="card-header">
-        <text class="poi-name">{{poiDetail.name}}</text>
+        <text class="poi-name">{{submissionDetail.name}}</text>
         <view class="category-tag">
-          <text class="category-text">{{poiDetail.categoryName}}</text>
+          <text class="category-text">{{submissionDetail.categoryName}}</text>
         </view>
       </view>
 
       <view class="info-row">
         <text class="info-label">地址</text>
-        <text class="info-value">{{poiDetail.address || '暂无'}}</text>
+        <text class="info-value">{{submissionDetail.address || '暂无'}}</text>
       </view>
 
       <view class="info-row">
         <text class="info-label">提交人</text>
-        <text class="info-value">{{poiDetail.submitter || '未知'}}</text>
+        <text class="info-value">{{submissionDetail.submitter || submissionDetail.collectorName || '未知'}}</text>
       </view>
 
       <view class="info-row">
         <text class="info-label">提交时间</text>
-        <text class="info-value">{{poiDetail.submitTime || '未知'}}</text>
+        <text class="info-value">{{submissionDetail.submitTime || submissionDetail.createTime || '未知'}}</text>
       </view>
 
-      <view class="info-row" wx:if="{{poiDetail.description}}">
+      <view class="info-row" wx:if="{{submissionDetail.description}}">
         <text class="info-label">描述</text>
-        <text class="info-value description">{{poiDetail.description}}</text>
+        <text class="info-value description">{{submissionDetail.description}}</text>
       </view>
 
-      <view class="map-button" bindtap="onViewMap" wx:if="{{poiDetail.location && poiDetail.location.latitude}}">
+      <view class="map-button" bindtap="onViewMap" wx:if="{{submissionDetail.latitude}}">
         <text class="map-button-text">查看位置</text>
       </view>
     </view>

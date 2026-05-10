@@ -2,7 +2,7 @@
 <view class="container">
 
   <!-- 筛选标签栏 -->
-  <view class="filter-bar" style="width: 518rpx; height: 141rpx; display: flex; box-sizing: border-box; left: NaNrpx; top: 0rpx">
+  <view class="filter-bar">
     <view
       class="filter-item {{filterStatus === 'all' ? 'active' : ''}}"
       bindtap="onFilterChange"
@@ -11,23 +11,23 @@
       全部
     </view>
     <view
-      class="filter-item {{filterStatus === 'pending' ? 'active' : ''}}"
+      class="filter-item {{filterStatus === 'PENDING_COLLECTION' ? 'active' : ''}}"
       bindtap="onFilterChange"
-      data-status="pending"
+      data-status="PENDING_COLLECTION"
     >
       待采集
     </view>
     <view
-      class="filter-item {{filterStatus === 'in_progress' ? 'active' : ''}}"
+      class="filter-item {{filterStatus === 'PENDING_REVIEW' ? 'active' : ''}}"
       bindtap="onFilterChange"
-      data-status="in_progress"
+      data-status="PENDING_REVIEW"
     >
-      采集中
+      审核中
     </view>
     <view
-      class="filter-item {{filterStatus === 'completed' ? 'active' : ''}}"
+      class="filter-item {{filterStatus === 'COMPLETED' ? 'active' : ''}}"
       bindtap="onFilterChange"
-      data-status="completed"
+      data-status="COMPLETED"
     >
       已完成
     </view>
@@ -41,8 +41,6 @@
       class="task-item"
       wx:for="{{taskList}}"
       wx:key="id"
-      bindtap="onTaskTap"
-      data-id="{{item.id}}"
     >
       <!-- 任务状态标签 -->
       <view class="task-status" style="background-color: {{getStatusInfo(item.status).color}}">
@@ -53,42 +51,66 @@
       <view class="task-content">
         <view class="task-header">
           <!-- 任务类型 -->
-          <text class="task-type">{{item.type === 'new' ? '新POI采集' : 'POI更新'}}</text>
+          <text class="task-type">{{item.taskType === 'CREATE_NEW' ? '新POI采集' : 'POI更新'}}</text>
           <!-- 发布时间 -->
-          <text class="task-time">{{formatTime(item.createTime)}}</text>
+          <text class="task-time">{{formatTime(item.createdAt)}}</text>
+        </view>
+
+        <!-- 任务目标名称 -->
+        <view class="task-name" wx:if="{{item.targetName}}">
+          {{item.targetName}}
         </view>
 
         <!-- 任务描述 -->
         <view class="task-desc">
-          <text wx:if="{{item.address}}">{{item.address}}</text>
+          <text wx:if="{{item.targetAddress}}">{{item.targetAddress}}</text>
           <text wx:else>未提供地址信息</text>
         </view>
 
         <!-- 重新采集原因 -->
-        <view class="task-reason" wx:if="{{item.reason && item.status === 'pending'}}">
-          <text class="reason-label">重新采集原因：</text>
-          <text class="reason-text">{{item.reason}}</text>
+        <view class="task-reason" wx:if="{{item.description && item.status === 'PENDING_COLLECTION'}}">
+          <text class="reason-label">任务描述：</text>
+          <text class="reason-text">{{item.description}}</text>
         </view>
 
         <!-- 任务底部信息 -->
         <view class="task-footer">
-          <!-- 优先级 -->
-          <view class="task-priority" wx:if="{{item.priority}}">
-            <text class="priority-label">优先级：</text>
-            <text class="priority-value {{item.priority === 'high' ? 'high' : ''}}">
-              {{item.priority === 'high' ? '高' : item.priority === 'medium' ? '中' : '低'}}
-            </text>
+          <!-- 分类标签 -->
+          <view class="task-category" wx:if="{{item.targetCategory}}">
+            <text class="category-tag">{{getCategoryName(item.targetCategory)}}</text>
           </view>
 
-          <!-- 截止时间 -->
-          <view class="task-deadline" wx:if="{{item.deadline}}">
-            <text>截止：{{formatTime(item.deadline)}}</text>
+          <!-- 分配人数 -->
+          <view class="assignee-count" wx:if="{{item.assigneeCount}}">
+            <text>已分配 {{item.assigneeCount}} 人</text>
           </view>
         </view>
       </view>
 
-      <!-- 箭头指示 -->
-      <view class="task-arrow">›</view>
+      <!-- 操作按钮区域 -->
+      <view class="task-actions">
+        <!-- Navigate 按钮 -->
+        <view
+          class="action-btn navigate-btn"
+          bindtap="onNavigate"
+          data-task="{{item}}"
+          wx:if="{{item.targetLongitude && item.targetLatitude}}"
+        >
+          <text class="btn-icon">📍</text>
+          <text class="btn-text">导航</text>
+        </view>
+
+        <!-- Submit 按钮 -->
+        <view
+          class="action-btn submit-btn {{item.status !== 'PENDING_COLLECTION' ? 'disabled' : ''}}"
+          bindtap="onSubmit"
+          data-task="{{item}}"
+          data-taskid="{{item.id}}"
+        >
+          <text class="btn-icon">✏️</text>
+          <text class="btn-text">{{item.status === 'PENDING_COLLECTION' ? '提交' : (item.status === 'PENDING_REVIEW' ? '审核中' : '已完成')}}</text>
+        </view>
+      </view>
     </view>
 
     <!-- 空状态 -->

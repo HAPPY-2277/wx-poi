@@ -8,7 +8,7 @@ const MOCK_POI_LIST = [
   {
     id: 'poi_001',
     name: '星巴克咖啡厅',
-    category: 'restaurant',
+    category: 'catering',
     description: '全球知名连锁咖啡店',
     longitude: 114.292,
     latitude: 30.608,
@@ -20,7 +20,7 @@ const MOCK_POI_LIST = [
   {
     id: 'poi_002',
     name: '中百仓储超市',
-    category: 'shop',
+    category: 'shopping',
     description: '大型超市',
     longitude: 114.271,
     latitude: 30.534,
@@ -73,8 +73,8 @@ const MOCK_SUBMISSION_LIST = [
     submitterId: MOCK_USER_ID,
     submissionType: 'CREATE',
     name: '星巴克咖啡厅',
-    category: 'restaurant',
-    description: '全球知名连锁咖啡店',
+    category: 'catering',
+    description: '全球知名连锁咖啡店，提供各式咖啡饮品和甜点',
     longitude: 114.292,
     latitude: 30.608,
     address: '武汉市江汉区建设大道568号',
@@ -85,7 +85,12 @@ const MOCK_SUBMISSION_LIST = [
     reviewedAt: null,
     createdAt: '2024-01-15T10:30:00+08:00',
     updatedAt: '2024-01-15T10:30:00+08:00',
-    taskId: 'task_001'
+    taskId: 'task_001',
+    photos: [
+      'https://picsum.photos/800/600?random=1',
+      'https://picsum.photos/800/600?random=2',
+      'https://picsum.photos/800/600?random=3'
+    ]
   },
   {
     id: 'sub_002',
@@ -93,7 +98,7 @@ const MOCK_SUBMISSION_LIST = [
     submitterId: 'collector_002',
     submissionType: 'UPDATE',
     name: '更新后的名称',
-    category: 'shop',
+    category: 'shopping',
     description: '更新后的描述',
     longitude: 114.310,
     latitude: 30.560,
@@ -105,12 +110,16 @@ const MOCK_SUBMISSION_LIST = [
     reviewedAt: '2024-01-14T18:00:00+08:00',
     createdAt: '2024-01-14T14:00:00+08:00',
     updatedAt: '2024-01-14T18:00:00+08:00',
-    taskId: 'task_002'
+    taskId: 'task_002',
+    photos: [
+      'https://picsum.photos/800/600?random=4',
+      'https://picsum.photos/800/600?random=5'
+    ]
   }
 ];
 
 module.exports = {
-  MOCK_ENABLED: true,
+  MOCK_ENABLED: false,
   MOCK_USER_ID,
 
   RESPONSES: {
@@ -159,7 +168,7 @@ module.exports = {
       data: MOCK_POI_LIST
     },
 
-    '/api/poi/collector': (collectorId) => {
+    '/api/poi/collector/*': (collectorId) => {
       const list = MOCK_POI_LIST.filter(p => p.collectorId === collectorId);
       return {
         success: true,
@@ -183,7 +192,7 @@ module.exports = {
       data: null
     },
 
-    '/api/task/collector': (collectorId) => {
+    '/api/task/collector/*': (collectorId) => {
       return {
         success: true,
         code: 200,
@@ -213,7 +222,7 @@ module.exports = {
       data: MOCK_SUBMISSION_LIST.filter(s => s.status === 'PENDING_REVIEW')
     },
 
-    '/api/submission/task': (taskId) => {
+    '/api/submission/task/*': (taskId) => {
       const list = MOCK_SUBMISSION_LIST.filter(s => s.taskId === taskId);
       return {
         success: true,
@@ -223,7 +232,7 @@ module.exports = {
       };
     },
 
-    '/api/submission/submitter': (submitterId) => {
+    '/api/submission/submitter/*': (submitterId) => {
       const list = MOCK_SUBMISSION_LIST.filter(s => s.submitterId === submitterId);
       return {
         success: true,
@@ -252,6 +261,24 @@ module.exports = {
       code: 200,
       message: '重新提交成功',
       data: null
+    },
+
+    '/api/submission/*': (submissionId) => {
+      const submission = MOCK_SUBMISSION_LIST.find(s => s.id === submissionId);
+      if (submission) {
+        return {
+          success: true,
+          code: 200,
+          message: '获取成功',
+          data: submission
+        };
+      }
+      return {
+        success: false,
+        code: 404,
+        message: '提交不存在',
+        data: null
+      };
     }
   },
 

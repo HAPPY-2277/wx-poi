@@ -135,7 +135,7 @@ const Request = {
     if (!response) return { success: false, code: 500, message: '未知错误' };
 
     if (typeof response.success === 'boolean') {
-      return response;
+      return this.adaptTimestamp(response);
     }
 
     if (typeof response.code === 'number') {
@@ -149,6 +149,40 @@ const Request = {
     }
 
     return response;
+  },
+
+  /**
+   * 统一时间字段命名
+   * API返回 createdAt/updatedAt，部分代码使用 createTime/updateTime
+   */
+  adaptTimestamp(response) {
+    if (!response) return response;
+    
+    if (Array.isArray(response.data)) {
+      response.data = response.data.map(item => this.mapTimestampFields(item));
+    } else if (response.data && typeof response.data === 'object') {
+      response.data = this.mapTimestampFields(response.data);
+    }
+    
+    return response;
+  },
+
+  mapTimestampFields(data) {
+    if (data.createdAt !== undefined && data.createTime === undefined) {
+      data.createTime = data.createdAt;
+    }
+    if (data.updatedAt !== undefined && data.updateTime === undefined) {
+      data.updateTime = data.updatedAt;
+    }
+    if (data.taskType !== undefined) {
+      if (data.taskType === 'CREATE_NEW') data.type = 'new';
+      if (data.taskType === 'UPDATE_EXISTING') data.type = 'update';
+    }
+    if (data.submissionType !== undefined) {
+      if (data.submissionType === 'CREATE') data.submissionType = 'create';
+      if (data.submissionType === 'UPDATE') data.submissionType = 'update';
+    }
+    return data;
   },
 
   get(url, data, needAuth = true) {

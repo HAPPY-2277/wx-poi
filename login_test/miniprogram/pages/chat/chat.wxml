@@ -18,7 +18,7 @@
     <view class="tab-bar">
       <view class="tab-item {{activeTab === 'system' ? 'active' : ''}}" data-tab="system" bindtap="onTabChange">
         <text class="tab-text">系统通知</text>
-        <view class="tab-badge" wx:if="{{unreadCount > 0}}"><text>{{unreadCount > 99 ? '99+' : unreadCount}}</text></view>
+        <view class="tab-badge" wx:if="{{systemUnreadCount > 0}}"><text>{{systemUnreadCount > 99 ? '99+' : systemUnreadCount}}</text></view>
       </view>
       <view class="tab-item {{activeTab === 'private' ? 'active' : ''}}" data-tab="private" bindtap="onTabChange">
         <text class="tab-text">私聊</text>

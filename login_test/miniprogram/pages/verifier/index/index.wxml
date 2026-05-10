@@ -1,104 +1,111 @@
 <!-- 核验者首页 -->
-<!-- 功能：展示用户信息、统计数据卡片和功能入口 -->
 <view class="container">
 
+  <!-- 未登录提示视图 -->
+  <view class="not-logged-in-view" wx:if="{{notLoggedIn}}">
+    <view class="lock-icon">🔒</view>
+    <text class="lock-title">登录后使用完整功能</text>
+    <text class="lock-desc">请先在"个人"页面完成登录/注册操作</text>
+    <button class="login-btn" bindtap="goToLogin">前往登录</button>
+  </view>
+
+  <!-- 已登录的核验者内容 -->
+  <block wx:else>
   <!-- 角色头部信息 -->
-  <view class="role-header" style="width: 354rpx; height: 220rpx; display: flex; box-sizing: border-box">
-    <view class="avatar-wrapper">
-      <image
-        class="avatar"
-        src="{{userInfo.avatar || '/images/avatar.png'}}"
-        mode="aspectFill"
-        binderror="onAvatarError"
-      />
-    </view>
+  <view class="header">
     <view class="user-info">
-      <text class="nickname">{{displayNickname}}</text>
-      <view class="role-badge">
-        <text class="role-text">核验者</text>
+      <!-- 用户头像 -->
+      <image class="avatar" src="{{userInfo.avatar}}" mode="aspectFill"></image>
+      <view class="info">
+        <text class="nickname">{{userInfo.nickname}}</text>
+        <text class="role-tag">核验者</text>
       </view>
     </view>
+    <view class="header-bg"></view>
   </view>
 
   <!-- 统计数据区域 -->
-  <view class="statistics-section" style="width: 556rpx; height: 347rpx; display: block; box-sizing: border-box; left: -72rpx; top: 0rpx">
-    <view class="section-title">审核概览</view>
-
-    <view class="statistics-cards">
+  <view class="stats-container">
+    <view class="stats-card" style="width: 485rpx; height: 175rpx; display: flex; box-sizing: border-box">
       <!-- 待审核数量 -->
-      <view class="stat-card">
-        <view class="stat-icon pending-icon">
-          <text class="icon-text">!</text>
-        </view>
-        <view class="stat-info">
-          <text class="stat-value">{{statistics.pendingCount}}</text>
-          <text class="stat-label">待审核</text>
-        </view>
+      <view class="stat-item">
+        <view class="stat-value">{{stats.pendingCount}}</view>
+        <view class="stat-label">待审核</view>
       </view>
-
+      <view class="stat-divider"></view>
       <!-- 今日已审核 -->
-      <view class="stat-card">
-        <view class="stat-icon today-icon">
-          <text class="icon-text">✓</text>
-        </view>
-        <view class="stat-info">
-          <text class="stat-value">{{statistics.todayVerified}}</text>
-          <text class="stat-label">今日已审</text>
-        </view>
+      <view class="stat-item">
+        <view class="stat-value">{{stats.todayVerified}}</view>
+        <view class="stat-label">今日已审</view>
       </view>
-
+      <view class="stat-divider"></view>
       <!-- 审核通过率 -->
-      <view class="stat-card">
-        <view class="stat-icon rate-icon">
-          <text class="icon-text">%</text>
-        </view>
-        <view class="stat-info">
-          <text class="stat-value">{{statistics.approvalRate}}%</text>
-          <text class="stat-label">通过率</text>
-        </view>
+      <view class="stat-item">
+        <view class="stat-value">{{stats.approvalRate}}%</view>
+        <view class="stat-label">通过率</view>
       </view>
     </view>
   </view>
 
   <!-- 功能入口区域 -->
-  <view class="function-section" style="height: 170rpx; display: block; box-sizing: border-box; color: aliceblue">
-    <!-- 功能菜单按钮 -->
-    <view class="menu-btn" bindtap="showMenu">
-      <text class="menu-btn-text">功能菜单</text>
-      <text class="menu-icon">☰</text>
+  <view class="function-container">
+    <view class="section-title">功能入口</view>
+    <view class="function-grid">
+
+      <!-- 发布任务 -->
+      <view class="function-card" bindtap="onFunctionTap" data-id="publish-task" data-path="{{functionList[0].path}}">
+        <view class="card-icon task-icon">
+          <image src="/images/icons/share.png" mode="aspectFit"></image>
+        </view>
+        <view class="card-content">
+          <text class="card-title">{{functionList[0].title}}</text>
+          <text class="card-desc">{{functionList[0].desc}}</text>
+        </view>
+      </view>
+
+      <!-- 审核列表 -->
+      <view class="function-card" bindtap="onFunctionTap" data-id="verify-list" data-path="{{functionList[1].path}}">
+        <view class="card-icon verify-icon">
+          <image src="/images/icons/task.png" mode="aspectFit"></image>
+        </view>
+        <view class="card-content">
+          <text class="card-title">{{functionList[1].title}}</text>
+          <text class="card-desc">{{functionList[1].desc}}</text>
+        </view>
+        <view class="badge" wx:if="{{functionList[1].badge > 0}}">
+          {{functionList[1].badge > 99 ? '99+' : functionList[1].badge}}
+        </view>
+      </view>
+
+      <!-- 我的审核 -->
+      <view class="function-card" bindtap="onFunctionTap" data-id="my-review" data-path="{{functionList[2].path}}">
+        <view class="card-icon review-icon">
+          <image src="/images/icons/audit.png" mode="aspectFit"></image>
+        </view>
+        <view class="card-content">
+          <text class="card-title">{{functionList[2].title}}</text>
+          <text class="card-desc">{{functionList[2].desc}}</text>
+        </view>
+      </view>
+
+      <!-- 地图视图 -->
+      <view class="function-card" bindtap="onFunctionTap" data-id="map" data-path="{{functionList[3].path}}">
+        <view class="card-icon map-icon">
+          <image src="/images/icons/map.png" mode="aspectFit"></image>
+        </view>
+        <view class="card-content">
+          <text class="card-title">{{functionList[3].title}}</text>
+          <text class="card-desc">{{functionList[3].desc}}</text>
+        </view>
+      </view>
+
     </view>
   </view>
 
-  <!-- 功能菜单弹窗 -->
-  <view class="menu-overlay" wx:if="{{showMenuPopup}}" bindtap="hideMenu">
-    <view class="menu-popup" catchtap="stopPropagation">
-      <view class="popup-header">
-        <text class="popup-title">功能菜单</text>
-        <view class="close-btn" bindtap="hideMenu">×</view>
-      </view>
-      <view class="menu-list">
-        <block wx:for="{{functionList}}" wx:key="id">
-          <view
-            class="menu-item"
-            data-id="{{item.id}}"
-            data-path="{{item.path}}"
-            bindtap="onMenuItemTap"
-          >
-            <view class="menu-item-icon">
-              <image src="{{item.icon}}" mode="aspectFit" />
-            </view>
-            <view class="menu-item-content">
-              <text class="menu-item-title">{{item.title}}</text>
-              <text class="menu-item-desc">{{item.desc}}</text>
-            </view>
-            <view class="menu-item-badge" wx:if="{{item.id === 'verify-list' && item.badge > 0}}">
-              <text class="badge-text">{{item.badge}}</text>
-            </view>
-            <text class="menu-arrow">›</text>
-          </view>
-        </block>
-      </view>
-    </view>
+  <!-- 加载状态 -->
+  <view class="loading" wx:if="{{loading}}">
+    <text>数据加载中...</text>
   </view>
+  </block>
 
 </view>

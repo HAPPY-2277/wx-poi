@@ -1,20 +1,23 @@
 // 采集表单页面
 // 功能：采集者提交POI数据（通过任务流程）
 
-const { API } = require('../../../config/api');
+const { API, TENCENT_MAP_KEY } = require('../../../config/api');
 const { Request } = require('../../../config/request');
+var QQMapWX = require('../../../utils/qqmap-wx-jssdk.js');
+
+var qqmapsdk = new QQMapWX({ key: TENCENT_MAP_KEY });
 
 const CATEGORIES = [
-  { id: 'restaurant', name: '餐饮' },
-  { id: 'shop', name: '购物' },
-  { id: 'life', name: '生活服务' },
-  { id: 'entertainment', name: '休闲娱乐' },
-  { id: 'hotel', name: '酒店住宿' },
-  { id: 'tourism', name: '旅游景点' },
-  { id: 'medical', name: '医疗健康' },
-  { id: 'education', name: '教育培训' },
-  { id: 'transport', name: '交通设施' },
-  { id: 'other', name: '其他' }
+  { id: 'catering', name: '餐饮', icon: '🍜' },
+  { id: 'shopping', name: '购物', icon: '🛒' },
+  { id: 'life_service', name: '生活服务', icon: '🏪' },
+  { id: 'entertainment', name: '休闲娱乐', icon: '🎮' },
+  { id: 'hotel', name: '酒店住宿', icon: '🏨' },
+  { id: 'scenic', name: '旅游景点', icon: '🏞️' },
+  { id: 'medical', name: '医疗健康', icon: '🏥' },
+  { id: 'education', name: '教育培训', icon: '🎓' },
+  { id: 'transport', name: '交通设施', icon: '🚇' },
+  { id: 'other', name: '其他', icon: '📌' }
 ];
 
 Page({
@@ -43,6 +46,9 @@ Page({
     if (options.taskId) {
       this.setData({ taskId: options.taskId });
       this.loadTaskInfo(options.taskId);
+      wx.setNavigationBarTitle({ title: '采集任务' });
+    } else {
+      wx.setNavigationBarTitle({ title: '新建采集' });
     }
   },
 
@@ -149,6 +155,9 @@ Page({
           'formData.longitude': res.longitude,
           gettingLocation: false
         });
+        
+        // 调用逆地理编码API获取地址信息
+        this.reverseGeocode(res.latitude, res.longitude);
         wx.showToast({ title: '定位成功', icon: 'success' });
       },
       fail: (err) => {
@@ -167,6 +176,38 @@ Page({
         } else {
           wx.showToast({ title: '获取位置失败', icon: 'none' });
         }
+      }
+    });
+  },
+
+  // 逆地理编码：根据经纬度获取详细地址
+  reverseGeocode(latitude, longitude) {
+    wx.showLoading({ title: '解析地址...' });
+    
+    qqmapsdk.reverseGeocoder({
+      location: {
+        latitude: latitude,
+        longitude: longitude
+      },
+      success: (res) => {
+        wx.hideLoading();
+        const result = res.result;
+        // 拼接详细地址（省+市+区+街道+门牌号）
+        const fullAddress = result.address || '';
+        const formattedAddress = result.formatted_addresses?.recommend || fullAddress;
+        
+        this.setData({
+          'formData.address': formattedAddress || fullAddress
+        });
+        
+        if (formattedAddress || fullAddress) {
+          wx.showToast({ title: '地址解析成功', icon: 'success' });
+        }
+      },
+      fail: (err) => {
+        wx.hideLoading();
+        console.error('逆地理编码失败:', err);
+        wx.showToast({ title: '地址解析失败，请手动输入', icon: 'none' });
       }
     });
   },
@@ -221,6 +262,7 @@ Page({
     const submitData = {
       taskId: this.data.taskId,
       submitterId: userId,
+      submissionType: 'CREATE',
       name: formData.name,
       category: formData.category,
       description: formData.description || '',

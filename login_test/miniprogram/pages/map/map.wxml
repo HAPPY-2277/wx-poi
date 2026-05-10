@@ -4,7 +4,7 @@
     <text class="user-name">{{userNickname}}</text>
   </view>
 
-        <!-- 地图容器 -->
+  <!-- 地图容器 -->
   <map
     id="myMap"
     class="map"
@@ -12,6 +12,7 @@
     latitude="{{latitude}}"
     longitude="{{longitude}}"
     scale="{{scale}}"
+    polyline="{{polyline}}"
     show-location
     enable-rotate="{{false}}"
     enable-overlooking="{{false}}"
@@ -22,22 +23,69 @@
   ></map>
 
   <!-- 搜索区域 -->
-  <view class="search-bar">
-    <form bindsubmit="onSearch">
-      <view class="search-box">
-        <input 
-          class="search-input" 
-          name="keyword" 
-          placeholder="搜索周边地点"
-          value="{{keyword}}"
-        />
-        <button class="search-btn" form-type="submit">搜索</button>
+  <view class="search-section">
+    <view class="search-box">
+      <input 
+        class="search-input" 
+        placeholder="搜索地点"
+        value="{{keyword}}"
+        bindinput="onKeywordInput"
+        bindconfirm="onSearchConfirm"
+      />
+      <button class="search-btn" bindtap="onSearchConfirm">搜索</button>
+    </view>
+    <!-- 搜索建议列表 -->
+    <view class="suggestion-list" wx:if="{{showSuggestions && suggestions.length > 0}}">
+      <view 
+        class="suggestion-item"
+        wx:for="{{suggestions}}"
+        wx:key="id"
+        bindtap="onSelectSuggestion"
+        data-item="{{item}}"
+      >
+        <view class="item-content">
+          <text class="item-title">{{item.title}}</text>
+          <text class="item-address">{{item.address}}</text>
+        </view>
       </view>
-    </form>
+    </view>
   </view>
 
   <!-- 定位按钮 -->
   <view class="location-btn" bindtap="getCurrentLocation">
     <text class="location-text">定位</text>
+  </view>
+
+  <!-- Marker信息弹窗 -->
+  <view class="marker-popup" wx:if="{{selectedMarker}}">
+    <view class="popup-header">
+      <text class="popup-title">{{selectedMarker.title}}</text>
+      <text class="popup-close" bindtap="closeMarkerPopup">×</text>
+    </view>
+    <view class="popup-body">
+      <view class="popup-actions">
+        <button class="action-btn route-btn" bindtap="calculateRoute">规划路线</button>
+        <button class="action-btn detail-btn" bindtap="goToDetail">查看详情</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 路径规划结果面板 -->
+  <view class="route-panel" wx:if="{{routeInfo}}">
+    <view class="route-header">
+      <text class="route-title">{{routeInfo.name}}</text>
+      <text class="route-close" bindtap="closeRoutePanel">×</text>
+    </view>
+    <view class="route-body">
+      <view class="route-item">
+        <text class="route-label">距离</text>
+        <text class="route-value">{{routeInfo.distance}}</text>
+      </view>
+      <view class="route-item">
+        <text class="route-label">步行约</text>
+        <text class="route-value">{{routeInfo.duration}}</text>
+      </view>
+    </view>
+    <button class="nav-btn" bindtap="startNavigation">开始导航</button>
   </view>
 </view>
