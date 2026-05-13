@@ -9,7 +9,66 @@
 
 ## 一、现有实现与API文档的差异分析
 
-### 1.1 认证接口差异
+### 1.0 代码审查结果（2026-05-13）
+
+经审查，当前代码已基本符合API文档规范，P0级问题均已修复：
+
+| 文件 | 状态 | 说明 |
+|------|------|------|
+| publish-task/index.js | ✅ 已修复 | taskType 正确使用 `CREATE_NEW`/`UPDATE_EXISTING`，assigneeIds 已传递 |
+| collect/index.js | ✅ 已修复 | submissionType 字段已添加 |
+| request.js | ✅ 已完善 | 字段映射适配器已实现，处理 createdAt/updateTime 转换 |
+| mock.js | ⚠️ 无需修改 | 按用户要求暂不修改 |
+
+### 1.1 POI列表接口文档分析
+
+#### API文档中定义的POI列表相关接口
+
+| 接口路径 | 方法 | 功能 | Schema |
+|----------|------|------|--------|
+| `/api/poi` | GET | 获取所有POI列表 | ApiResponseListPoiResponse |
+| `/api/poi/{id}` | GET | 获取POI详情 | ApiResponsePoiResponse |
+| `/api/poi/collector/{collectorId}` | GET | 获取指定采集者的POI | ApiResponseListPoiResponse |
+
+#### PoiResponse 数据结构（API文档定义）
+
+```json
+{
+  "id": "string",
+  "name": "string",
+  "category": "string",
+  "description": "string",
+  "longitude": "number (double)",
+  "latitude": "number (double)",
+  "address": "string",
+  "collectorId": "string",
+  "createdAt": "date-time",
+  "updatedAt": "date-time"
+}
+```
+
+#### ApiResponseListPoiResponse 结构
+
+```json
+{
+  "code": "integer (int32)",
+  "message": "string",
+  "data": [
+    { "$ref": "#/components/schemas/PoiResponse" }
+  ],
+  "success": "boolean"
+}
+```
+
+### 1.2 当前实现与文档差异
+
+| 差异项 | API文档 | 当前实现 | 状态 |
+|--------|---------|----------|------|
+| 接口路径 | `/api/poi/collector/{collectorId}` | 已正确实现 | ✅ 一致 |
+| POI列表结构 | 使用 `PoiResponse` | 使用 `MOCK_POI_LIST` | ⚠️ 待统一 |
+| 时间字段 | `createdAt` / `updatedAt` | 已通过 `normalizeListData` 转换 | ✅ 已处理 |
+
+### 1.3 认证接口差异
 
 | 差异项 | API文档定义 | 当前实现 | 影响范围 |
 |--------|------------|----------|----------|
@@ -413,5 +472,78 @@ const submitData = {
 
 ---
 
-*文档版本: v1.0*
-*最后更新: 2026-05-10*
+## 九、API文档对比分析与POI列表重构总结
+
+### 9.1 文档一致性检查
+
+对比 `api-doc_YAML.yaml` 和 `api-docs_json.json` 两个文档：
+
+**路径差异**：两文档接口路径完全一致
+**Schema差异**：两文档定义的 Schema 结构一致
+**字段名称**：两文档定义的字段名称一致
+
+### 9.2 POI列表接口重构（本次完成）
+
+#### API文档定义的POI列表接口
+
+| 接口 | 方法 | 响应Schema | 说明 |
+|------|------|-----------|------|
+| `/api/poi` | GET | ApiResponseListPoiResponse | 获取所有POI列表 |
+| `/api/poi/{id}` | GET | ApiResponsePoiResponse | 获取POI详情 |
+| `/api/poi/collector/{collectorId}` | GET | ApiResponseListPoiResponse | 获取采集者的POI |
+
+#### PoiResponse 字段规范
+
+```json
+{
+  "id": "string",
+  "name": "string", 
+  "category": "string",
+  "description": "string",
+  "longitude": "number(double)",
+  "latitude": "number(double)", 
+  "address": "string",
+  "collectorId": "string",
+  "createdAt": "datetime",
+  "updatedAt": "datetime"
+}
+```
+
+### 9.3 当前实现状态
+
+| 组件 | 状态 | 说明 |
+|------|------|------|
+| api.js | ✅ 已更新 | 添加POI接口文档注释 |
+| request.js | ✅ 已完善 | normalizeListData处理字段转换 |
+| Mock数据 | ⚠️ 保持不变 | 按用户要求不修改mock.js |
+
+### 9.4 关键字段映射关系
+
+| API字段 | 前端使用字段 | 映射处理 |
+|---------|-------------|----------|
+| `createdAt` | `createTime` | request.js normalizeListData 转换 |
+| `updatedAt` | `updateTime` | request.js normalizeListData 转换 |
+| `taskType: CREATE_NEW` | `type: 'new'` | request.js normalizeListData 转换 |
+| `taskType: UPDATE_EXISTING` | `type: 'update'` | request.js normalizeListData 转换 |
+| `submissionType: CREATE` | `submissionType: 'create'` | request.js normalizeListData 转换 |
+| `submissionType: UPDATE` | `submissionType: 'update'` | request.js normalizeListData 转换 |
+
+### 9.3 后续优化建议
+
+1. **P1级优化**：
+   - 实现采集者选择器的完整功能（assigneeIds）
+   - 优化 verify-detail 的 onShow 重复加载逻辑
+   
+2. **P2级优化**：
+   - 统一分类值定义（当前使用 RESIDENTIAL/COMMERCIAL 等，需与后端对齐）
+   - 实现分页功能
+
+3. **P3级优化**：
+   - 实现完整的注册流程
+   - 添加请求重试机制
+
+---
+
+*文档版本: v1.2*
+*最后更新: 2026-05-13*
+*审查结果: P0级问题已全部修复，POI列表API已重构完成*

@@ -2,7 +2,7 @@
 <view class="container">
 
   <!-- 表单区域 -->
-  <view class="form-container" style="width: 570rpx; height: 1347rpx; display: block; box-sizing: border-box">
+  <view class="form-container" style="width: 595rpx; height: 1245rpx; display: block; box-sizing: border-box">
 
     <!-- 目标名称 -->
     <view class="form-item {{errors.targetName ? 'error' : ''}}">

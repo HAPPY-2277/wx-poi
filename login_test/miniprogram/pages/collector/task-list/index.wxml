@@ -2,7 +2,7 @@
 <view class="container">
 
   <!-- 筛选标签栏 -->
-  <view class="filter-bar">
+  <view class="filter-bar" style="position: sticky; left: NaNrpx; top: 0rpx; width: 599rpx; height: 125rpx; display: flex; box-sizing: border-box">
     <view
       class="filter-item {{filterStatus === 'all' ? 'active' : ''}}"
       bindtap="onFilterChange"

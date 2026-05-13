@@ -64,11 +64,11 @@
       <view class="poi-arrow">›</view>
     </view>
 
-    <view class="empty-state" wx:if="{{!loading && poiList.length === 0}}">
+    <view class="empty-state" wx:if="{{!loading && poiList.length === 0}}" style="width: 349rpx; height: 558rpx; display: flex; box-sizing: border-box">
       <image class="empty-icon" src="/images/icons/empty.png" mode="aspectFit"></image>
       <text class="empty-text">暂无采集记录</text>
-      <text class="empty-tip">开始采集第一个POI吧</text>
-      <button class="start-collect-btn" bindtap="goToCollect">开始采集</button>
+
+
     </view>
 
     <view class="loading-more" wx:if="{{loading && poiList.length > 0}}"><text>加载中...</text></view>

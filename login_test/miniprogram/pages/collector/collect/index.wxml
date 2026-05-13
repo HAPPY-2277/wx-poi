@@ -6,10 +6,12 @@
 
     <!-- POI名称 -->
     <view class="form-item {{errors.name ? 'error' : ''}}">
-      <view class="form-label">POI名称 <text class="required">*</text></view>
+      <view class="form-label">POI名称 <text class="required">*</text>
+        <text class="ocr-hint" wx:if="{{recognizingOCR}}">（正在识别...）</text>
+      </view>
       <input
         class="form-input"
-        placeholder="请输入POI名称"
+        placeholder="请输入POI名称，或上传图片自动识别"
         value="{{formData.name}}"
         bindinput="onNameInput"
         maxlength="100"

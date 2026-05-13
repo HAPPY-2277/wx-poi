@@ -4,18 +4,20 @@
 const { API } = require('../../../config/api');
 const { Request } = require('../../../config/request');
 
-const CATEGORY_MAP = {
-  catering: '餐饮',
-  shopping: '购物',
-  life_service: '生活服务',
-  entertainment: '休闲娱乐',
-  hotel: '酒店住宿',
-  scenic: '旅游景点',
-  medical: '医疗健康',
-  education: '教育培训',
-  transport: '交通设施',
-  other: '其他'
-};
+// 任务分类枚举（与API规范保持一致）
+const CATEGORIES = [
+  { id: 'RESIDENTIAL', name: '居住区', icon: '🏠' },
+  { id: 'COMMERCIAL', name: '商业区', icon: '🏬' },
+  { id: 'PUBLIC_SERVICE', name: '公共服务', icon: '🏢' },
+  { id: 'TRANSPORTATION', name: '交通设施', icon: '🚇' },
+  { id: 'RECREATION', name: '休闲娱乐', icon: '🎡' }
+];
+
+// POI分类映射（与CATEGORIES保持一致）
+const CATEGORY_MAP = CATEGORIES.reduce((acc, cat) => {
+  acc[cat.id] = cat.name;
+  return acc;
+}, {});
 
 Page({
   data: {
@@ -26,16 +28,7 @@ Page({
     },
     categoryOptions: [
       { id: 'all', name: '全部' },
-      { id: 'catering', name: '餐饮' },
-      { id: 'shopping', name: '购物' },
-      { id: 'life_service', name: '生活服务' },
-      { id: 'entertainment', name: '休闲娱乐' },
-      { id: 'hotel', name: '酒店住宿' },
-      { id: 'scenic', name: '旅游景点' },
-      { id: 'medical', name: '医疗健康' },
-      { id: 'education', name: '教育培训' },
-      { id: 'transport', name: '交通设施' },
-      { id: 'other', name: '其他' }
+      ...CATEGORIES.map(c => ({ id: c.id, name: c.name }))
     ],
     sortOptions: [
       { id: 'newest', name: '最新' },

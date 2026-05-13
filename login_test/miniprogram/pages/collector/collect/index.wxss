@@ -38,6 +38,13 @@
   margin-left: 4rpx;
 }
 
+.ocr-hint {
+  font-size: 24rpx;
+  color: #07c160;
+  font-weight: normal;
+  margin-left: 16rpx;
+}
+
 /* 输入框 */
 .form-input {
   width: 100%;

@@ -5,20 +5,24 @@ const { API, TENCENT_MAP_KEY } = require('../../../config/api');
 const { Request } = require('../../../config/request');
 var QQMapWX = require('../../../utils/qqmap-wx-jssdk.js');
 
+const MSG_BASE_URL = require('../../../config/config.js').MSG_SERVER.BASE_URL;
+const OCR_TIMEOUT = 15000;
+
 var qqmapsdk = new QQMapWX({ key: TENCENT_MAP_KEY });
 
 const CATEGORIES = [
-  { id: 'catering', name: '餐饮', icon: '🍜' },
-  { id: 'shopping', name: '购物', icon: '🛒' },
-  { id: 'life_service', name: '生活服务', icon: '🏪' },
-  { id: 'entertainment', name: '休闲娱乐', icon: '🎮' },
-  { id: 'hotel', name: '酒店住宿', icon: '🏨' },
-  { id: 'scenic', name: '旅游景点', icon: '🏞️' },
-  { id: 'medical', name: '医疗健康', icon: '🏥' },
-  { id: 'education', name: '教育培训', icon: '🎓' },
-  { id: 'transport', name: '交通设施', icon: '🚇' },
-  { id: 'other', name: '其他', icon: '📌' }
+  { id: 'RESIDENTIAL', name: '居住区', icon: '🏠' },
+  { id: 'COMMERCIAL', name: '商业区', icon: '🏬' },
+  { id: 'PUBLIC_SERVICE', name: '公共服务', icon: '🏢' },
+  { id: 'TRANSPORTATION', name: '交通设施', icon: '🚇' },
+  { id: 'RECREATION', name: '休闲娱乐', icon: '🎡' }
 ];
+
+// POI分类映射（与CATEGORIES保持一致）
+const CATEGORY_MAP = CATEGORIES.reduce((acc, cat) => {
+  acc[cat.id] = cat.name;
+  return acc;
+}, {});
 
 Page({
   data: {
@@ -39,7 +43,8 @@ Page({
     gettingLocation: false,
     errors: {},
     taskId: null,
-    taskInfo: null
+    taskInfo: null,
+    recognizingOCR: false
   },
 
   onLoad(options) {
@@ -121,11 +126,90 @@ Page({
       sizeType: ['compressed'],
       sourceType: ['album', 'camera'],
       success: (res) => {
-        this.setData({ photoList: [...this.data.photoList, ...res.tempFilePaths] });
+        console.log('[OCR] 选择图片成功:', res.tempFilePaths);
+        const newPhotos = res.tempFilePaths;
+        this.setData({ photoList: [...this.data.photoList, ...newPhotos] });
+        if (newPhotos.length > 0) {
+          this.recognizeOCR(newPhotos[0]);
+        }
       },
       fail: (err) => {
         console.error('选择图片失败:', err);
         wx.showToast({ title: '选择图片失败', icon: 'none' });
+      }
+    });
+  },
+
+  recognizeOCR(filePath) {
+    console.log('[OCR] recognizeOCR 被调用, filePath:', filePath);
+    console.log('[OCR] 当前状态 - recognizingOCR:', this.data.recognizingOCR, 'name:', this.data.formData.name);
+
+    if (this.data.recognizingOCR) {
+      console.log('[OCR] 跳过：正在识别中');
+      return;
+    }
+    if (this.data.formData.name && this.data.formData.name.trim() !== '') {
+      console.log('[OCR] 跳过：名称已有内容');
+      return;
+    }
+
+    this.setData({ recognizingOCR: true });
+    console.log('[OCR] 开始读取图片为 Base64...');
+
+    wx.getFileSystemManager().readFile({
+      filePath: filePath,
+      encoding: 'base64',
+      success: (fileRes) => {
+        const base64Data = fileRes.data;
+        console.log('[OCR] Base64 长度:', base64Data ? base64Data.length : 0);
+        this.callOCRApi(base64Data);
+      },
+      fail: (err) => {
+        this.setData({ recognizingOCR: false });
+        console.error('读取图片失败:', err);
+      }
+    });
+  },
+
+  callOCRApi(base64Data) {
+    const that = this;
+    const ocrUrl = `${MSG_BASE_URL}/api/ocr/recognize`;
+    console.log('[OCR] 准备调用接口:', ocrUrl);
+
+    wx.request({
+      url: ocrUrl,
+      method: 'POST',
+      header: { 'Content-Type': 'application/json' },
+      data: { image_data: base64Data },
+      timeout: OCR_TIMEOUT,
+      success(ocrRes) {
+        console.log('[OCR] 接口响应:', ocrRes);
+
+        if (ocrRes.statusCode === 200 && ocrRes.data && ocrRes.data.success) {
+          const words = ocrRes.data.words;
+
+          if (words && words.length > 0) {
+            const recognizedName = words[0];
+            that.setData({ 'formData.name': recognizedName });
+            wx.showToast({ title: '已识别到文字', icon: 'success' });
+          } else {
+            wx.showToast({ title: '未识别到文字', icon: 'none' });
+          }
+        } else {
+          const message = ocrRes.data?.message || 'OCR识别失败';
+          console.error('OCR识别失败:', message);
+        }
+      },
+      fail(err) {
+        that.setData({ recognizingOCR: false });
+        const errorMsg = err.errMsg || '网络错误';
+
+        if (err.errMsg && err.errMsg.includes('timeout')) {
+          wx.showToast({ title: 'OCR识别超时', icon: 'none' });
+        } else {
+          wx.showToast({ title: 'OCR请求失败', icon: 'none' });
+        }
+        console.error('OCR请求失败:', errorMsg);
       }
     });
   },

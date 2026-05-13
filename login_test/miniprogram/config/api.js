@@ -1,5 +1,9 @@
 // 统一 API 配置
-// 基于 PROJECT_API_AND_SCHEMA.md 后端接口文档
+// 基于 API 文档 api-doc_YAML.yaml / api-docs_json.json
+// POI列表相关接口:
+//   - GET /api/poi                    => 获取所有POI列表 (ApiResponseListPoiResponse)
+//   - GET /api/poi/{id}               => 获取POI详情 (ApiResponsePoiResponse)
+//   - GET /api/poi/collector/{id}      => 获取采集者的POI (ApiResponseListPoiResponse)
 
 const { SERVER, MSG_SERVER, THIRD_PARTY } = require('./config.js');
 
@@ -30,8 +34,8 @@ const API = {
 
   USER: {
     COLLECTOR_IDS: `${API_BASE_URL}/api/users/collector-ids`,
-    COLLECTORS: `${API_BASE_URL}/api/user/collectors`,
-    VERIFIERS: `${API_BASE_URL}/api/user/verifiers`,
+    VERIFIER_IDS: `${API_BASE_URL}/api/users/verifier-ids`,
+    ALL_IDS: `${API_BASE_URL}/api/users/ids`,
   },
 
   CATEGORY: {
@@ -58,6 +62,10 @@ const API = {
     GROUP_HISTORY: `${MSG_BASE_URL}/api/messages/history/group`,
     SUBMIT_OBJECTION: `${MSG_BASE_URL}/api/messages/objection`,
     WS_URL: (userId) => `ws://${MSG_SERVER.WS_HOST}:${MSG_SERVER.WS_PORT}/ws/${userId}`,
+  },
+
+  OCR: {
+    RECOGNIZE: `${MSG_BASE_URL}/api/ocr/recognize`
   }
 };
 

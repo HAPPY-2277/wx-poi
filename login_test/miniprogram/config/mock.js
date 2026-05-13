@@ -161,6 +161,46 @@ module.exports = {
       };
     },
 
+    '/api/users/ids': {
+      success: true,
+      code: 200,
+      message: '获取成功',
+      data: [
+        {
+          id: 'user_collector_001',
+          nickname: '张三',
+          role: 'collector',
+          lastLoginAt: '2026-05-12T10:30:00+08:00',
+          createdAt: '2026-01-15T08:00:00+08:00',
+          online: true
+        },
+        {
+          id: 'user_collector_002',
+          nickname: '李四',
+          role: 'collector',
+          lastLoginAt: '2026-05-11T15:20:00+08:00',
+          createdAt: '2026-02-01T09:00:00+08:00',
+          online: false
+        },
+        {
+          id: 'user_verifier_001',
+          nickname: '王核验',
+          role: 'verifier',
+          lastLoginAt: '2026-05-13T08:00:00+08:00',
+          createdAt: '2025-12-20T14:00:00+08:00',
+          online: true
+        },
+        {
+          id: 'user_verifier_002',
+          nickname: '赵审核',
+          role: 'verifier',
+          lastLoginAt: '2026-05-10T11:00:00+08:00',
+          createdAt: '2026-01-05T10:00:00+08:00',
+          online: false
+        }
+      ]
+    },
+
     '/api/poi': {
       success: true,
       code: 200,
@@ -193,11 +233,28 @@ module.exports = {
     },
 
     '/api/task/collector/*': (collectorId) => {
+      console.log('[Mock] 获取采集者任务列表:', collectorId);
       return {
         success: true,
         code: 200,
         message: '获取成功',
-        data: MOCK_TASK_LIST
+        data: MOCK_TASK_LIST.map(task => ({
+          ...task,
+          id: task.id,
+          publisherId: task.publisherId,
+          poiId: task.poiId,
+          description: task.description,
+          status: task.status,
+          assigneeCount: task.assigneeCount,
+          createdAt: task.createdAt,
+          updatedAt: task.updatedAt,
+          taskType: task.taskType,
+          targetName: task.targetName,
+          targetCategory: task.targetCategory,
+          targetLongitude: task.targetLongitude,
+          targetLatitude: task.targetLatitude,
+          targetAddress: task.targetAddress
+        }))
       };
     },
 

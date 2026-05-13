@@ -9,7 +9,7 @@
   <view class="chat-wrapper" wx:else>
     <view class="header">
       <text class="header-title">消息中心</text>
-      <view class="user-info">
+      <view class="user-info" style="width: 353rpx; height: 105rpx; display: flex; box-sizing: border-box">
         <image class="avatar" src="{{userInfo.avatar}}" mode="aspectFill" />
         <text class="nickname">{{userInfo.nickname}}</text>
       </view>
@@ -26,9 +26,13 @@
       <view class="tab-item {{activeTab === 'group' ? 'active' : ''}}" data-tab="group" bindtap="onTabChange">
         <text class="tab-text">群聊</text>
       </view>
+      <view class="tab-item {{activeTab === 'users' ? 'active' : ''}}" data-tab="users" bindtap="onTabChange">
+        <text class="tab-text">用户</text>
+      </view>
     </view>
 
-    <view class="content" style="width: 587rpx; display: block; box-sizing: border-box">
+    <view class="content">
+      <!-- 系统通知列表 -->
       <view class="system-list" wx:if="{{activeTab === 'system'}}">
         <block wx:if="{{systemNotifications.length > 0}}">
           <view class="notification-item" wx:for="{{systemNotifications}}" wx:key="msg_uuid" data-index="{{index}}" bindtap="onNotificationTap">
@@ -37,7 +41,7 @@
               <text class="notification-title">{{item.content}}</text>
               <text class="notification-time">{{item.created_at}}</text>
             </view>
-            <view class="unread-dot" wx:if="{{!item.is_read}}"></view>
+            <view class="unread-dot" wx:if="{{item.is_read === 0}}"></view>
           </view>
         </block>
         <view class="empty-state" wx:else>
@@ -47,6 +51,7 @@
         </view>
       </view>
 
+      <!-- 私聊列表 -->
       <view class="private-list" wx:if="{{activeTab === 'private'}}">
         <text class="section-title">最近私聊</text>
         <block wx:if="{{privateChats.length > 0}}">
@@ -69,6 +74,7 @@
         </view>
       </view>
 
+      <!-- 群聊列表 -->
       <view class="group-list" wx:if="{{activeTab === 'group'}}">
         <view class="group-item" data-groupid="1" bindtap="onGroupChatTap">
           <view class="group-icon collector">👥</view>
@@ -86,6 +92,53 @@
           </view>
           <text class="group-arrow">›</text>
         </view>
+      </view>
+
+      <!-- 用户列表 -->
+      <view class="user-list-container" wx:if="{{activeTab === 'users'}}">
+        <!-- 加载状态 -->
+        <view class="loading-state" wx:if="{{userListLoading}}">
+          <view class="loading-spinner"></view>
+          <text class="loading-text">加载用户列表...</text>
+        </view>
+
+        <!-- 错误状态 -->
+        <view class="error-state" wx:elif="{{userListError}}">
+          <view class="error-icon">⚠️</view>
+          <text class="error-text">{{userListError}}</text>
+          <button class="retry-btn" bindtap="onRetryUserList">重新加载</button>
+        </view>
+
+        <!-- 空状态 -->
+        <view class="empty-state" wx:elif="{{userListEmpty}}">
+          <view class="empty-icon">👥</view>
+          <text class="empty-text">暂无用户</text>
+          <text class="empty-hint">用户列表为空</text>
+        </view>
+
+        <!-- 用户列表 -->
+        <block wx:elif="{{userList.length > 0}}">
+          <view class="user-list">
+            <view class="user-card" wx:for="{{userList}}" wx:key="id" data-user="{{item}}" bindtap="onUserTap">
+              <view class="user-avatar-wrapper">
+                <image class="user-avatar" src="{{item.avatar || '/images/avatar.png'}}" mode="aspectFill" />
+                <view class="user-status-dot"></view>
+              </view>
+              <view class="user-info">
+                <view class="user-name-row">
+                  <text class="user-name">{{item.nickname || item.name || '用户' + item.id}}</text>
+                  <view class="user-role-tag" style="background: {{getRoleInfo(item.role).color}}">
+                    <text>{{getRoleInfo(item.role).label}}</text>
+                  </view>
+                </view>
+                <text class="user-meta">加入于 {{formatUserTime(item.createTime)}}</text>
+              </view>
+              <view class="user-action">
+                <text class="action-icon">💬</text>
+              </view>
+            </view>
+          </view>
+        </block>
       </view>
     </view>
   </view>

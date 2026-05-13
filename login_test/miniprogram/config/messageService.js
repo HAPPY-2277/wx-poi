@@ -424,10 +424,10 @@ function adaptMessageResponse(response) {
   if (typeof response.code === 'number') {
     return {
       success: response.code === 0,
-      code: 0,
+      code: response.code,
       msg: response.msg || (response.code === 0 ? '成功' : '请求失败'),
-      data: response.data,
-      message: response.msg
+      data: response.data || [],
+      message: response.msg || ''
     };
   }
 

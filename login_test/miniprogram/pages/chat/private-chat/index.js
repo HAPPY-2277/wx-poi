@@ -2,6 +2,12 @@
 // 功能：采集者与核验者私聊讨论
 const messageService = require('../../../config/messageService');
 
+// 消息已读状态常量
+const MSG_READ_STATUS = {
+  UNREAD: 0,
+  READ: 1
+};
+
 Page({
   data: {
     userId: null,
@@ -14,11 +20,12 @@ Page({
     pageSize: 20,
     hasMore: true,
     myUserId: null,
-    scrollTop: 0
+    scrollTop: 0,
+    _messageListener: null
   },
 
   onLoad(options) {
-    const { userId, chatType } = options;
+    const { userId } = options;
     if (userId) {
       this.setData({
         targetId: parseInt(userId),
@@ -35,7 +42,9 @@ Page({
   },
 
   setupMessageListener() {
-    messageService.addMessageListener(this.handleNewMessage.bind(this));
+    const listener = this.handleNewMessage.bind(this);
+    this.setData({ _messageListener: listener });
+    messageService.addMessageListener(listener);
   },
 
   async loadHistory(refresh = true) {
@@ -52,7 +61,7 @@ Page({
         (pageNum - 1) * this.data.pageSize
       );
 
-      if (res.success) {
+      if (res.success && res.data) {
         const messages = refresh ? res.data : [...this.data.messages, ...res.data];
         this.setData({
           messages,
@@ -73,9 +82,9 @@ Page({
 
   markMessagesAsRead(messages) {
     const unreadUuids = messages
-      .filter(m => !m.is_read && m.from_user_id !== this.data.myUserId)
+      .filter(m => m.is_read === MSG_READ_STATUS.UNREAD && m.from_user_id !== this.data.myUserId)
       .map(m => m.msg_uuid);
-    
+
     if (unreadUuids.length > 0) {
       messageService.markAsRead(unreadUuids);
     }
@@ -83,10 +92,10 @@ Page({
 
   handleNewMessage(message) {
     if (message.msg_type !== 'private') return;
-    
+
     const isRelevant = (message.from_user_id === this.data.targetId && message.to_id === this.data.myUserId) ||
                        (message.from_user_id === this.data.myUserId && message.to_id === this.data.targetId);
-    
+
     if (isRelevant) {
       this.setData({
         messages: [...this.data.messages, message]
@@ -126,7 +135,7 @@ Page({
         to_type: 'user',
         content: content,
         content_type: 'text',
-        is_read: 1,
+        is_read: MSG_READ_STATUS.READ,
         created_at: new Date().toISOString()
       };
       this.setData({
@@ -151,6 +160,8 @@ Page({
   },
 
   onUnload() {
-    messageService.removeMessageListener(this.handleNewMessage.bind(this));
+    if (this.data._messageListener) {
+      messageService.removeMessageListener(this.data._messageListener);
+    }
   }
 });

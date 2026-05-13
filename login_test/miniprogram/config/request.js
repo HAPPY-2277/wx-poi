@@ -4,6 +4,34 @@
 const { API } = require('./api');
 const { MOCK_ENABLED, RESPONSES } = require('./mock');
 
+/**
+ * API响应状态码常量
+ */
+const API_CODE = {
+  SUCCESS: 200,
+  BAD_REQUEST: 400,
+  UNAUTHORIZED: 401,
+  FORBIDDEN: 403,
+  NOT_FOUND: 404,
+  SERVER_ERROR: 500
+};
+
+/**
+ * 解析API错误信息
+ */
+const parseErrorMessage = (response, err) => {
+  if (response && response.message) {
+    return response.message;
+  }
+  if (response && response.msg) {
+    return response.msg;
+  }
+  if (err && err.message) {
+    return err.message;
+  }
+  return '请求失败';
+};
+
 const Request = {
   /**
    * 获取 Mock 响应数据（支持动态路径匹配）
@@ -73,6 +101,12 @@ const Request = {
 
   /**
    * 统一请求方法
+   * @param {Object} options 请求配置
+   * @param {string} options.url 请求地址
+   * @param {string} options.method 请求方法 (GET/POST/PUT/DELETE)
+   * @param {Object} options.data 请求数据
+   * @param {boolean} options.needAuth 是否需要认证
+   * @returns {Promise<Object>} API响应数据
    */
   request(options) {
     const { url, method = 'GET', data = {}, needAuth = true } = options;
@@ -102,49 +136,64 @@ const Request = {
         data,
         header,
         success: (res) => {
+          const statusCode = res.statusCode;
+          
+          if (statusCode === API_CODE.UNAUTHORIZED || statusCode === API_CODE.FORBIDDEN) {
+            wx.removeStorageSync('loginToken');
+            wx.removeStorageSync('userId');
+            wx.navigateTo({ url: '/pages/index/index' });
+            reject({ success: false, code: statusCode, message: '登录已过期，请重新登录' });
+            return;
+          }
+
           const response = res.data;
           const adaptedResponse = this.adaptResponse(response);
 
           if (adaptedResponse.success) {
-            resolve(adaptedResponse);
+            const normalizedData = this.normalizeListData(adaptedResponse);
+            resolve(normalizedData);
           } else {
-            if (adaptedResponse.message) {
-              wx.showToast({
-                title: adaptedResponse.message,
-                icon: 'none'
-              });
+            const errorMsg = parseErrorMessage(adaptedResponse, null);
+            if (errorMsg && errorMsg !== '请求失败') {
+              wx.showToast({ title: errorMsg, icon: 'none' });
             }
             reject(adaptedResponse);
           }
         },
         fail: (err) => {
-          wx.showToast({
-            title: '网络请求失败',
-            icon: 'none'
-          });
-          reject(err);
+          const errorMsg = err.errMsg || '网络请求失败';
+          wx.showToast({ title: errorMsg, icon: 'none' });
+          reject({ success: false, code: API_CODE.SERVER_ERROR, message: errorMsg });
         }
       });
     });
   },
 
   /**
-   * 适配两种返回格式
+   * 适配多种API返回格式
+   * @param {Object} response API响应原始数据
+   * @returns {Object} 统一格式的响应
    */
   adaptResponse(response) {
-    if (!response) return { success: false, code: 500, message: '未知错误' };
+    if (!response) {
+      return { success: false, code: API_CODE.SERVER_ERROR, message: '未知错误' };
+    }
 
     if (typeof response.success === 'boolean') {
-      return this.adaptTimestamp(response);
+      return {
+        success: response.success,
+        code: response.code || (response.success ? API_CODE.SUCCESS : API_CODE.SERVER_ERROR),
+        message: response.message || '',
+        data: response.data
+      };
     }
 
     if (typeof response.code === 'number') {
       return {
-        success: response.code === 0,
-        code: 200,
+        success: response.code === 0 || response.code === API_CODE.SUCCESS,
+        code: response.code,
         message: response.msg || (response.code === 0 ? '成功' : '请求失败'),
-        data: response.data,
-        msg: response.msg
+        data: response.data
       };
     }
 
@@ -152,37 +201,59 @@ const Request = {
   },
 
   /**
-   * 统一时间字段命名
-   * API返回 createdAt/updatedAt，部分代码使用 createTime/updateTime
+   * 规范化列表数据，统一字段命名
+   * @param {Object} response API响应
+   * @returns {Object} 规范化后的响应
    */
-  adaptTimestamp(response) {
+  normalizeListData(response) {
     if (!response) return response;
+
+    const normalizeItem = (item) => {
+      if (!item) return item;
+
+      const normalized = { ...item };
+
+      if (item.createdAt !== undefined && item.createTime === undefined) {
+        normalized.createTime = item.createdAt;
+      }
+      if (item.updatedAt !== undefined && item.updateTime === undefined) {
+        normalized.updateTime = item.updatedAt;
+      }
+
+      if (item.taskType === 'CREATE_NEW') normalized.type = 'new';
+      if (item.taskType === 'UPDATE_EXISTING') normalized.type = 'update';
+
+      if (item.submissionType === 'CREATE') normalized.submissionType = 'create';
+      if (item.submissionType === 'UPDATE') normalized.submissionType = 'update';
+
+      if (item.targetAddress === undefined && item.address !== undefined) {
+        normalized.targetAddress = item.address;
+      }
+      if (item.targetName === undefined && item.name !== undefined) {
+        normalized.targetName = item.name;
+      }
+      if (item.targetCategory === undefined && item.category !== undefined) {
+        normalized.targetCategory = item.category;
+      }
+      if (item.targetLongitude === undefined && item.longitude !== undefined) {
+        normalized.targetLongitude = item.longitude;
+      }
+      if (item.targetLatitude === undefined && item.latitude !== undefined) {
+        normalized.targetLatitude = item.latitude;
+      }
+
+      return normalized;
+    };
+
+    const result = { ...response };
     
     if (Array.isArray(response.data)) {
-      response.data = response.data.map(item => this.mapTimestampFields(item));
+      result.data = response.data.map(normalizeItem);
     } else if (response.data && typeof response.data === 'object') {
-      response.data = this.mapTimestampFields(response.data);
+      result.data = normalizeItem(response.data);
     }
-    
-    return response;
-  },
 
-  mapTimestampFields(data) {
-    if (data.createdAt !== undefined && data.createTime === undefined) {
-      data.createTime = data.createdAt;
-    }
-    if (data.updatedAt !== undefined && data.updateTime === undefined) {
-      data.updateTime = data.updatedAt;
-    }
-    if (data.taskType !== undefined) {
-      if (data.taskType === 'CREATE_NEW') data.type = 'new';
-      if (data.taskType === 'UPDATE_EXISTING') data.type = 'update';
-    }
-    if (data.submissionType !== undefined) {
-      if (data.submissionType === 'CREATE') data.submissionType = 'create';
-      if (data.submissionType === 'UPDATE') data.submissionType = 'update';
-    }
-    return data;
+    return result;
   },
 
   get(url, data, needAuth = true) {
@@ -191,6 +262,14 @@ const Request = {
 
   post(url, data, needAuth = true) {
     return this.request({ url, method: 'POST', data, needAuth });
+  },
+
+  put(url, data, needAuth = true) {
+    return this.request({ url, method: 'PUT', data, needAuth });
+  },
+
+  delete(url, data, needAuth = true) {
+    return this.request({ url, method: 'DELETE', data, needAuth });
   },
 
   login(code) {

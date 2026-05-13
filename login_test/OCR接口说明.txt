@@ -1,0 +1,86 @@
+接口说明
+用于识别 POI 图片中的文字（如店铺招牌、门牌等），自动提取文字内容，辅助采集者填写 POI 名称。
+
+基本信息
+请求方式：POST
+
+接口路径：/api/ocr/recognize
+
+完整示例：http://消息服务器IP:8000/api/ocr/recognize
+（开发阶段 IP 如 127.0.0.1 或局域网 IP）
+
+请求头：Content-Type: application/json
+
+请求参数（Body）
+字段名	类型	必填	说明
+image_data	string	是	图片的 Base64 编码字符串，不含 data:image/...;base64, 前缀
+⚠️ 注意：前端从 wx.chooseImage 等得到的临时路径，需用 wx.getFileSystemManager().readFile 读取为 base64，并去掉前缀（如 data:image/png;base64,）后再传入。
+
+请求示例（JSON）
+json
+{
+  "image_data": "/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAg...（省略）"
+}
+成功响应示例（HTTP 200）
+json
+{
+  "success": true,
+  "words": ["兰州拉面", "牛肉拉面", "手工拉面"],
+  "message": "识别成功"
+}
+words 数组：按识别置信度排序，通常第一个是最主要的文字。
+
+若没有识别到文字：success 为 false，words 为空数组。
+
+失败响应示例
+json
+{
+  "success": false,
+  "words": [],
+  "message": "未识别到文字或识别失败"
+}
+小程序调用示例（原生 JavaScript）
+javascript
+// 选择图片并识别
+function recognizeImage() {
+  wx.chooseImage({
+    count: 1,
+    sizeType: ['compressed'],
+    sourceType: ['camera', 'album'],
+    success(res) {
+      const tempFilePath = res.tempFilePaths[0];
+      // 读取图片为 base64
+      wx.getFileSystemManager().readFile({
+        filePath: tempFilePath,
+        encoding: 'base64',
+        success(fileRes) {
+          const base64Data = fileRes.data; // 纯 base64，无前缀
+          // 调用后端 OCR 接口
+          wx.request({
+            url: 'http://你的消息服务器IP:8000/api/ocr/recognize',
+            method: 'POST',
+            header: { 'Content-Type': 'application/json' },
+            data: { image_data: base64Data },
+            success(ocrRes) {
+              if (ocrRes.data.success && ocrRes.data.words.length > 0) {
+                const recognizedName = ocrRes.data.words[0];
+                // 将识别结果填入 POI 名称输入框
+                that.setData({ poiName: recognizedName });
+                wx.showToast({ title: '识别成功', icon: 'success' });
+              } else {
+                wx.showToast({ title: '未识别到文字', icon: 'none' });
+              }
+            },
+            fail() {
+              wx.showToast({ title: '网络错误', icon: 'none' });
+            }
+          });
+        },
+        fail() {
+          wx.showToast({ title: '读取图片失败', icon: 'none' });
+        }
+      });
+    }
+  });
+}
+注意：请将 http://你的消息服务器IP:8000 替换为实际的消息后端地址。

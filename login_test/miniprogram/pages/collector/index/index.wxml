@@ -12,7 +12,7 @@
   <!-- 已登录的采集者内容 -->
   <block wx:else>
   <!-- 角色头部信息 -->
-  <view class="header">
+  <view class="header" style="width: 379rpx; height: 193rpx; display: block; box-sizing: border-box; left: -16rpx; top: 0rpx">
     <view class="user-info">
       <!-- 用户头像 -->
       <image class="avatar" src="{{userInfo.avatar}}" mode="aspectFill"></image>
@@ -26,22 +26,22 @@
 
   <!-- 统计数据区域 -->
   <view class="stats-container">
-    <view class="stats-card" style="width: 447rpx; height: 110rpx; display: flex; box-sizing: border-box">
-      <!-- 新任务数 -->
-      <view class="stat-item">
-        <view class="stat-value">{{stats.newTasks}}</view>
-        <view class="stat-label">新任务</view>
-      </view>
-      <view class="stat-divider"></view>
+    <view class="stats-card" style="width: 487rpx; height: 168rpx; display: flex; box-sizing: border-box">
       <!-- 待处理任务数 -->
       <view class="stat-item">
-        <view class="stat-value">{{stats.pendingTasks}}</view>
+        <view class="stat-value">{{stats.pendingTask}}</view>
         <view class="stat-label">待处理</view>
       </view>
       <view class="stat-divider"></view>
-      <!-- 我的采集数 -->
+      <!-- 待审核POI数 -->
       <view class="stat-item">
-        <view class="stat-value">{{stats.myCollections}}</view>
+        <view class="stat-value">{{stats.pendingPoi}}</view>
+        <view class="stat-label">待审核</view>
+      </view>
+      <view class="stat-divider"></view>
+      <!-- 总采集数 -->
+      <view class="stat-item">
+        <view class="stat-value">{{stats.totalPoi}}</view>
         <view class="stat-label">已采集</view>
       </view>
     </view>
@@ -53,39 +53,39 @@
     <view class="function-grid">
 
       <!-- 任务列表 -->
-      <view class="function-card" bindtap="onFunctionTap" data-id="tasks" data-path="{{functionList[1].path}}">
+      <view class="function-card" bindtap="onFunctionTap" data-id="tasks" data-path="{{functionList[0].path}}">
         <view class="card-icon task-icon">
           <image src="/images/icons/task.png" mode="aspectFit"></image>
+        </view>
+        <view class="card-content">
+          <text class="card-title">{{functionList[0].title}}</text>
+          <text class="card-desc">{{functionList[0].desc}}</text>
+        </view>
+        <!-- 角标显示待处理任务数 -->
+        <view class="badge" wx:if="{{functionList[0].badge > 0}}">
+          {{functionList[0].badge > 99 ? '99+' : functionList[0].badge}}
+        </view>
+      </view>
+
+      <!-- 我的采集 -->
+      <view class="function-card" bindtap="onFunctionTap" data-id="my" data-path="{{functionList[1].path}}">
+        <view class="card-icon my-icon">
+          <image src="/images/icons/list.png" mode="aspectFit"></image>
         </view>
         <view class="card-content">
           <text class="card-title">{{functionList[1].title}}</text>
           <text class="card-desc">{{functionList[1].desc}}</text>
         </view>
-        <!-- 角标显示待处理任务数 -->
-        <view class="badge" wx:if="{{functionList[1].badge > 0}}">
-          {{functionList[1].badge > 99 ? '99+' : functionList[1].badge}}
-        </view>
-      </view>
-
-      <!-- 我的采集 -->
-      <view class="function-card" bindtap="onFunctionTap" data-id="my" data-path="{{functionList[2].path}}">
-        <view class="card-icon my-icon">
-          <image src="/images/icons/list.png" mode="aspectFit"></image>
-        </view>
-        <view class="card-content">
-          <text class="card-title">{{functionList[2].title}}</text>
-          <text class="card-desc">{{functionList[2].desc}}</text>
-        </view>
       </view>
 
       <!-- 地图视图 -->
-      <view class="function-card" bindtap="onFunctionTap" data-id="map" data-path="{{functionList[3].path}}">
+      <view class="function-card" bindtap="onFunctionTap" data-id="map" data-path="{{functionList[2].path}}">
         <view class="card-icon map-icon">
           <image src="/images/icons/map.png" mode="aspectFit"></image>
         </view>
         <view class="card-content">
-          <text class="card-title">{{functionList[3].title}}</text>
-          <text class="card-desc">{{functionList[3].desc}}</text>
+          <text class="card-title">{{functionList[2].title}}</text>
+          <text class="card-desc">{{functionList[2].desc}}</text>
         </view>
       </view>
 
