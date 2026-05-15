@@ -9,8 +9,8 @@ var qqmapsdk = new QQMapWX({ key: TENCENT_MAP_KEY });
 
 // POI分类选项（5个新分类）
 const CATEGORIES = [
-  { id: 'RESIDENTIAL', name: '居住区', icon: '🏠' },
-  { id: 'COMMERCIAL', name: '商业区', icon: '🏬' },
+  { id: 'RESIDENTIAL', name: '居住社区', icon: '🏠' },
+  { id: 'COMMERCIAL', name: '商业街区', icon: '🏬' },
   { id: 'PUBLIC_SERVICE', name: '公共服务', icon: '🏢' },
   { id: 'TRANSPORTATION', name: '交通设施', icon: '🚇' },
   { id: 'RECREATION', name: '休闲娱乐', icon: '🎡' }

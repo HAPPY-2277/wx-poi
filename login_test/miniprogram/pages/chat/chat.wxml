@@ -20,9 +20,6 @@
         <text class="tab-text">系统通知</text>
         <view class="tab-badge" wx:if="{{systemUnreadCount > 0}}"><text>{{systemUnreadCount > 99 ? '99+' : systemUnreadCount}}</text></view>
       </view>
-      <view class="tab-item {{activeTab === 'private' ? 'active' : ''}}" data-tab="private" bindtap="onTabChange">
-        <text class="tab-text">私聊</text>
-      </view>
       <view class="tab-item {{activeTab === 'group' ? 'active' : ''}}" data-tab="group" bindtap="onTabChange">
         <text class="tab-text">群聊</text>
       </view>
@@ -51,28 +48,7 @@
         </view>
       </view>
 
-      <!-- 私聊列表 -->
-      <view class="private-list" wx:if="{{activeTab === 'private'}}">
-        <text class="section-title">最近私聊</text>
-        <block wx:if="{{privateChats.length > 0}}">
-          <view class="chat-item" wx:for="{{privateChats}}" wx:key="targetId" data-targetId="{{item.targetId}}" bindtap="onPrivateChatTap">
-            <view class="chat-avatar">👤</view>
-            <view class="chat-info">
-              <text class="chat-name">用户 {{item.targetId}}</text>
-              <text class="chat-preview">{{item.lastMessage.content}}</text>
-            </view>
-            <view class="chat-meta">
-              <text class="chat-time">{{item.lastMessage.created_at}}</text>
-              <view class="unread-badge" wx:if="{{item.unread > 0}}"><text>{{item.unread}}</text></view>
-            </view>
-          </view>
-        </block>
-        <view class="empty-state" wx:else>
-          <view class="empty-icon">💬</view>
-          <text class="empty-text">暂无私聊记录</text>
-          <text class="empty-hint">可在核验详情页发起与采集者的私聊</text>
-        </view>
-      </view>
+      
 
       <!-- 群聊列表 -->
       <view class="group-list" wx:if="{{activeTab === 'group'}}">
@@ -119,19 +95,18 @@
         <!-- 用户列表 -->
         <block wx:elif="{{userList.length > 0}}">
           <view class="user-list">
-            <view class="user-card" wx:for="{{userList}}" wx:key="id" data-user="{{item}}" bindtap="onUserTap">
+            <view class="user-card" wx:for="{{userList}}" wx:key="userId" data-user="{{item}}" bindtap="onUserTap">
               <view class="user-avatar-wrapper">
-                <image class="user-avatar" src="{{item.avatar || '/images/avatar.png'}}" mode="aspectFill" />
+                <image class="user-avatar" src="{{item.avatar}}" mode="aspectFill" />
                 <view class="user-status-dot"></view>
               </view>
               <view class="user-info">
                 <view class="user-name-row">
-                  <text class="user-name">{{item.nickname || item.name || '用户' + item.id}}</text>
+                  <text class="user-name">{{item.nickname}}</text>
                   <view class="user-role-tag" style="background: {{getRoleInfo(item.role).color}}">
                     <text>{{getRoleInfo(item.role).label}}</text>
                   </view>
                 </view>
-                <text class="user-meta">加入于 {{formatUserTime(item.createTime)}}</text>
               </view>
               <view class="user-action">
                 <text class="action-icon">💬</text>

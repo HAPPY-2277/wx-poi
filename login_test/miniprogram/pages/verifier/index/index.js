@@ -3,6 +3,7 @@
 
 const { API } = require('../../../config/api');
 const { Request } = require('../../../config/request');
+const { getAvatarByUserInfo } = require('../../../utils/avatar');
 
 Page({
   data: {
@@ -74,10 +75,10 @@ Page({
 
   getUserInfo() {
     const nickname = wx.getStorageSync('userNickname');
-    const avatar = wx.getStorageSync('userAvatar') || '/images/avatar.png';
+    const userRole = wx.getStorageSync('userRole');
     this.setData({
       'userInfo.nickname': nickname || '核验者',
-      'userInfo.avatar': avatar
+      'userInfo.avatar': getAvatarByUserInfo({ role: userRole })
     });
   },
 

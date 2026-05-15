@@ -54,7 +54,7 @@
           <view class="poi-image-wrapper">
             <image
               class="poi-image"
-              src="{{item.photos[0] || '/images/default-goods-image.png'}}"
+              src="{{item._firstImageUrl || '/images/default-goods-image.png'}}"
               mode="aspectFill"
             />
             <!-- 分类标签 -->

@@ -3,6 +3,7 @@
 const { API } = require('../../config/api');
 const { Request } = require('../../config/request');
 const messageService = require('../../config/messageService');
+const { getAvatarByUserInfo } = require('../../utils/avatar');
 
 // 消息已读状态常量（与后端保持一致）
 const MSG_READ_STATUS = {
@@ -20,11 +21,9 @@ Page({
     },
     userId: null,
     messages: [],
-    unreadCount: 0,
     systemUnreadCount: 0,
-    activeTab: 'private',
+    activeTab: 'system',
     systemNotifications: [],
-    privateChats: [],
     currentUserId: null,
     _messageListener: null,
     _connectionListener: null,
@@ -54,23 +53,16 @@ Page({
    * 根据当前Tab刷新对应数据
    */
   refreshCurrentTab() {
-    switch (this.data.activeTab) {
-      case 'system':
-        this.fetchSystemNotifications(true);
-        break;
-      case 'private':
-        this.fetchUnreadCount(true);
-        break;
-      case 'users':
-        this.fetchUserList(true);
-        break;
+    if (this.data.activeTab === 'system') {
+      this.fetchSystemNotifications(true);
+    } else if (this.data.activeTab === 'users') {
+      this.fetchUserList(true);
     }
   },
 
   checkLoginStatus() {
     const loginToken = wx.getStorageSync('loginToken');
     const userNickname = wx.getStorageSync('userNickname') || '';
-    const userAvatar = wx.getStorageSync('userAvatar') || '/images/avatar.png';
     const userRole = wx.getStorageSync('userRole') || '';
     const userId = wx.getStorageSync('userId') || null;
 
@@ -79,7 +71,7 @@ Page({
         isLoggedIn: true,
         userInfo: {
           nickname: userNickname,
-          avatar: userAvatar,
+          avatar: getAvatarByUserInfo({ role: userRole }),
           role: userRole
         },
         currentUserId: userId
@@ -114,13 +106,9 @@ Page({
     try {
       const unreadRes = await messageService.getUnreadMessages(this.data.currentUserId);
       if (unreadRes.success && unreadRes.data) {
-        const privateUnread = unreadRes.data.filter(m => m.msg_type === 'private');
         const systemUnread = unreadRes.data.filter(m => m.msg_type === 'system');
-
         this.setData({
-          unreadCount: privateUnread.length,
-          systemUnreadCount: systemUnread.length,
-          privateChats: this.groupPrivateMessages(privateUnread)
+          systemUnreadCount: systemUnread.length
         });
         this.updateTabBarBadge(unreadRes.data.length);
       }
@@ -208,9 +196,9 @@ Page({
     // 直接处理数组格式（某些API可能直接返回数组）
     if (Array.isArray(res)) {
       return res.filter(u => u && u.id !== this.data.currentUserId).map(u => ({
-        //id: u.id || u.userId || '',
-        nickname: u.nickname || u.name || `用户${u.id || ''}`,
-        avatar: u.avatar || '/images/avatar.png',
+        userId: u.id || u.userId || 0,
+        nickname: u.nickname || u.name || '未知用户',
+        avatar: getAvatarByUserInfo({ role: u.role }),
         role: u.role || 'unknown',
         createTime: u.createdAt || u.createTime || null,
         online: u.online || false
@@ -220,9 +208,9 @@ Page({
     // 处理包装响应格式 { success, code, message, data: [...] }
     if (res.data && Array.isArray(res.data)) {
       return res.data.filter(u => u && u.id !== this.data.currentUserId).map(user => ({
-        id: user.id || user.userId || '',
-        nickname: user.nickname || user.name || `用户${user.id || ''}`,
-        avatar: user.avatar || '/images/avatar.png',
+        userId: user.id || user.userId || 0,
+        nickname: user.nickname || user.name || '未知用户',
+        avatar: getAvatarByUserInfo({ role: user.role }),
         role: user.role || 'unknown',
         createTime: user.createdAt || user.createTime || null,
         online: user.online || false
@@ -279,16 +267,16 @@ Page({
    */
   onUserTap(e) {
     const user = e.currentTarget.dataset.user;
-    if (!user || !user.id) return;
+    if (!user || !user.userId) return;
 
-    if (user.id === this.data.currentUserId) {
+    if (user.userId === this.data.currentUserId) {
       wx.showToast({ title: '不能与自己聊天', icon: 'none' });
       return;
     }
 
-    const nickname = user.nickname || user.name || `用户${user.id}`;
+    const nickname = user.nickname || '用户';
     wx.navigateTo({
-      url: `/pages/chat/private-chat/index?userId=${user.id}&chatType=private&nickname=${encodeURIComponent(nickname)}`
+      url: `/pages/chat/private-chat/index?userId=${user.userId}&chatType=private&nickname=${encodeURIComponent(nickname)}&role=${user.role || 'unknown'}`
     });
   },
 
@@ -297,26 +285,6 @@ Page({
    */
   onRetryUserList() {
     this.fetchUserList(true);
-  },
-
-  groupPrivateMessages(messages) {
-    const groups = {};
-    const currentUserId = this.data.currentUserId;
-
-    messages.forEach(msg => {
-      const chatKey = msg.from_user_id === currentUserId ? msg.to_id : msg.from_user_id;
-      if (!groups[chatKey]) {
-        groups[chatKey] = {
-          targetId: chatKey,
-          lastMessage: msg,
-          unread: 0
-        };
-      }
-      if (this.isUnreadMessage(msg) && msg.from_user_id !== currentUserId) {
-        groups[chatKey].unread++;
-      }
-    });
-    return Object.values(groups);
   },
 
   isUnreadMessage(message) {
@@ -337,18 +305,14 @@ Page({
   handleNewMessage(message) {
     console.log('收到新消息:', message);
 
-    if (message.msg_type === 'private') {
-      const unreadCount = this.data.unreadCount + 1;
-      this.setData({ unreadCount });
-      this.updateTabBarBadge(unreadCount + this.data.systemUnreadCount);
-    } else if (message.msg_type === 'system') {
+    if (message.msg_type === 'system') {
       const notifications = [message, ...this.data.systemNotifications];
       const systemUnreadCount = this.data.systemUnreadCount + 1;
       this.setData({
         systemNotifications: notifications,
         systemUnreadCount: systemUnreadCount
       });
-      this.updateTabBarBadge(this.data.unreadCount + systemUnreadCount);
+      this.updateTabBarBadge(systemUnreadCount);
     }
 
     wx.showToast({
@@ -369,13 +333,6 @@ Page({
     if (tab === 'users') {
       this.fetchUserList();
     }
-  },
-
-  onPrivateChatTap(e) {
-    const { targetid } = e.currentTarget.dataset;
-    wx.navigateTo({
-      url: `/pages/chat/private-chat/index?userId=${targetid}&chatType=private`
-    });
   },
 
   onGroupChatTap(e) {

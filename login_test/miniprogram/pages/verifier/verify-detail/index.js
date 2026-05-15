@@ -3,6 +3,10 @@
 
 const { API } = require('../../../config/api');
 const { Request } = require('../../../config/request');
+const { ImageService } = require('../../../config/imageService');
+const { SERVER } = require('../../../config/config');
+
+const IMAGE_BASE_URL = SERVER.BASE_URL;
 
 Page({
   data: {
@@ -46,9 +50,12 @@ Page({
     try {
       const res = await Request.get(API.SUBMISSION.DETAIL(id), {}, true);
       if (res.data) {
+        const submission = res.data;
+        const imageUrls = this.extractImageUrls(submission);
+
         this.setData({
-          submissionDetail: res.data,
-          imageUrls: res.data.photos || []
+          submissionDetail: submission,
+          imageUrls: imageUrls
         });
       }
     } catch (err) {
@@ -58,6 +65,38 @@ Page({
       wx.hideLoading();
       this.setData({ isLoading: false });
     }
+  },
+
+  extractImageUrls(data) {
+    if (!data) return [];
+
+    if (Array.isArray(data.images) && data.images.length > 0) {
+      return data.images
+        .map(img => {
+          const url = img.imageUrl || img.url || img;
+          if (!url) return null;
+          if (url.startsWith('http://') || url.startsWith('https://')) {
+            return url;
+          }
+          return IMAGE_BASE_URL + url;
+        })
+        .filter(url => url);
+    }
+
+    if (Array.isArray(data.photos) && data.photos.length > 0) {
+      return data.photos.map(url => {
+        if (url.startsWith('http://') || url.startsWith('https://')) {
+          return url;
+        }
+        return IMAGE_BASE_URL + url;
+      });
+    }
+
+    if (Array.isArray(data.images) && data.images.length === 0) {
+      return [];
+    }
+
+    return [];
   },
 
   onImageSwiperChange(e) {

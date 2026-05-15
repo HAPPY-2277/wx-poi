@@ -1,24 +1,64 @@
 // 地图服务页面
-// 功能：展示地图、搜索周边地点、显示当前位置、显示任务标记点、路径规划
+// 功能：展示地图、搜索周边地点、显示当前位置、任务标记管理、路径规划
+// 重构要点：
+// 1. 身份权限控制：采集者自动加载其任务点
+// 2. 标记样式：按类别显示，完成状态统一绿色
+// 3. 实时更新：定时刷新机制
 
 var QQMapWX = require('../../utils/qqmap-wx-jssdk.js');
 const { TENCENT_MAP_KEY, API } = require('../../config/api.js');
 const { Request } = require('../../config/request');
+const { ImageService } = require('../../config/imageService');
 
 var qqmapsdk = new QQMapWX({
   key: TENCENT_MAP_KEY
 });
 
-// 标记点配置 - 根据任务类型区分颜色
-const MARKER_CONFIG = {
-  PENDING_COLLECTION: { color: '#FF9500', size: 32 },
-  PENDING_REVIEW: { color: '#007AFF', size: 32 },
-  HIGH_PRIORITY: { color: '#FF3B30', size: 36 },
-  NORMAL_PRIORITY: { color: '#FF9500', size: 32 },
-  LOW_PRIORITY: { color: '#8E8E93', size: 32 },
-  COMPLETED: { color: '#34C759', size: 32 },
-  SEARCH_RESULT: { color: '#07c160', size: 32 },
-  default: { color: '#8E8E93', size: 32 }
+// ==================== 标记配置 ====================
+// POI分类图标映射 - 对应任务类别
+const CATEGORY_MARKER_ICONS = {
+  RESIDENTIAL: { icon: '🏠', label: '居住社区' },
+  COMMERCIAL: { icon: '🏬', label: '商业街区' },
+  PUBLIC_SERVICE: { icon: '🏢', label: '公共服务' },
+  TRANSPORTATION: { icon: '🚇', label: '交通设施' },
+  RECREATION: { icon: '🎡', label: '休闲娱乐' }
+};
+
+// 状态图标路径配置 - 不同状态使用不同图标
+const MARKER_ICONS = {
+  PENDING_COLLECTION: '/images/marker-orange.png',
+  PENDING_REVIEW: '/images/marker-blue.png',
+  HIGH_PRIORITY: '/images/marker-red.png',
+  NORMAL_PRIORITY: '/images/marker-orange.png',
+  LOW_PRIORITY: '/images/marker-gray.png',
+  COMPLETED: '/images/marker-green.png',
+  SEARCH_RESULT: '/images/marker-green.png',
+  default: '/images/marker.png'
+};
+
+// 图标颜色配置 - 备用方案：当图标不存在时使用colorFill
+const MARKER_COLORS = {
+  PENDING_COLLECTION: '#FF9500',
+  PENDING_REVIEW: '#007AFF',
+  HIGH_PRIORITY: '#FF3B30',
+  NORMAL_PRIORITY: '#FF9500',
+  LOW_PRIORITY: '#8E8E93',
+  COMPLETED: '#34C759',
+  SEARCH_RESULT: '#34C759',
+  default: '#8E8E93'
+};
+
+// 标记大小配置
+const MARKER_SIZES = {
+  HIGH_PRIORITY: 36,
+  default: 32
+};
+
+// 优先级标签映射
+const PRIORITY_LABELS = {
+  high: '高优先级',
+  medium: '普通优先级',
+  low: '低优先级'
 };
 
 // 腾讯地图 polyline 解码函数
@@ -29,12 +69,10 @@ function decodePolyline(polyline) {
   const kr = 1000000;
   const coords = [...polyline];
   
-  // 前向差分解码：coors[i] = coors[i-2] + coors[i]/1e6
   for (let i = 2; i < coords.length; i++) {
     coords[i] = Number(coords[i - 2]) + Number(coords[i]) / kr;
   }
   
-  // 提取坐标点
   for (let i = 0; i < coords.length; i += 2) {
     points.push({
       latitude: coords[i],
@@ -43,6 +81,15 @@ function decodePolyline(polyline) {
   }
   
   return points;
+}
+
+// 防抖函数 - 避免频繁触发
+function debounce(fn, delay) {
+  let timer = null;
+  return function(...args) {
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(() => fn.apply(this, args), delay);
+  };
 }
 
 Page({
@@ -62,26 +109,52 @@ Page({
     selectedMarker: null,
     routeInfo: null,
     searchDebounceTimer: null,
-    isSearching: false
+    isSearching: false,
+    isRefreshing: false,
+    lastRefreshTime: null
   },
 
+  // ==================== 生命周期 ====================
   onLoad() {
-    this.setData({
-      userNickname: wx.getStorageSync('userNickname') || '未登录',
-      userRole: wx.getStorageSync('userRole') || ''
-    });
-    this.useCachedLocation();
-    this.loadMarkersByRole();
+    this.initUserInfo();
+    this.initLocation();
+    this.initRefreshTimer();
   },
 
   onShow() {
+    this.refreshUserInfo();
+    this.onPageResume();
+  },
+
+  onUnload() {
+    this.clearRefreshTimer();
+  },
+
+  // ==================== 初始化方法 ====================
+  initUserInfo() {
     this.setData({
       userNickname: wx.getStorageSync('userNickname') || '未登录',
       userRole: wx.getStorageSync('userRole') || ''
     });
   },
 
-  useCachedLocation() {
+  refreshUserInfo() {
+    const role = wx.getStorageSync('userRole') || '';
+    const nickname = wx.getStorageSync('userNickname') || '未登录';
+    const roleChanged = role !== this.data.userRole;
+    
+    this.setData({
+      userNickname: nickname,
+      userRole: role
+    });
+
+    // 角色切换时重新加载标记
+    if (roleChanged && role) {
+      this.refreshMarkers();
+    }
+  },
+
+  initLocation() {
     const cached = wx.getStorageSync('lastLocation');
     if (cached) {
       this.setData({
@@ -93,45 +166,116 @@ Page({
     this.getCurrentLocation();
   },
 
-  loadMarkersByRole() {
-    const role = this.data.userRole;
-    if (role === 'collector') {
-      this.loadCollectorTasks();
-    } else if (role === 'verifier') {
-      this.loadVerifierSubmissions();
-    } else {
-      this.loadVerifierSubmissions();
+  // ==================== 实时更新机制 ====================
+  refreshTimer: null,
+
+  initRefreshTimer() {
+    this.clearRefreshTimer();
+    // 每30秒刷新一次标记数据
+    this.refreshTimer = setInterval(() => {
+      this.refreshMarkers();
+    }, 30000);
+  },
+
+  clearRefreshTimer() {
+    if (this.refreshTimer) {
+      clearInterval(this.refreshTimer);
+      this.refreshTimer = null;
     }
   },
 
+  // 页面恢复时刷新（从其他页面返回时）
+  onPageResume() {
+    this.refreshMarkersDebounced();
+  },
+
+  // 防抖刷新
+  refreshMarkersDebounced: debounce(function() {
+    this.refreshMarkers();
+  }, 1000),
+
+  // 主动刷新方法 - 供外部调用
+  forceRefresh() {
+    this.refreshMarkers();
+  },
+
+  // ==================== 核心数据加载 ====================
+  async refreshMarkers() {
+    const { userRole } = this.data;
+    
+    // 未登录不加载
+    if (!userRole) {
+      console.log('[Map] 未检测到用户角色，跳过标记加载');
+      return;
+    }
+
+    this.setData({ isRefreshing: true });
+    
+    try {
+      if (userRole === 'collector') {
+        // 采集者：加载分配给自己的任务点
+        await this.loadCollectorTasks();
+      } else if (userRole === 'verifier') {
+        // 核验者：加载待核验列表
+        await this.loadVerifierSubmissions();
+      } else {
+        // 其他角色默认加载待核验列表
+        await this.loadVerifierSubmissions();
+      }
+      
+      this.setData({ 
+        lastRefreshTime: new Date().toLocaleTimeString(),
+        isRefreshing: false 
+      });
+      
+      console.log('[Map] 标记刷新完成，时间:', this.data.lastRefreshTime);
+    } catch (err) {
+      console.error('[Map] 标记刷新失败:', err);
+      this.setData({ isRefreshing: false });
+    }
+  },
+
+  // 加载采集者任务列表
   async loadCollectorTasks() {
     const userId = wx.getStorageSync('userId');
-    if (!userId) return;
+    if (!userId) {
+      console.log('[Map] 未找到用户ID');
+      return;
+    }
 
     try {
       const res = await Request.get(API.TASK.COLLECTOR_LIST(userId), {}, true);
       const taskList = res.data || [];
-      const pendingTasks = taskList.filter(t => t.status === 'PENDING_COLLECTION');
-      this.setData({ poiList: pendingTasks });
-      this.convertToMarkers(pendingTasks, 'PENDING_COLLECTION');
+      
+      // 根据状态过滤并处理任务
+      this.setData({ poiList: taskList });
+      this.convertToMarkers(taskList);
+      
+      console.log(`[Map] 采集者任务加载完成，共 ${taskList.length} 个任务`);
     } catch (err) {
-      console.error('获取采集者任务列表失败:', err);
+      console.error('[Map] 获取采集者任务列表失败:', err);
+      wx.showToast({ title: '加载任务失败', icon: 'none' });
     }
   },
 
+  // 加载核验者待核验列表
   async loadVerifierSubmissions() {
     try {
       const res = await Request.get(API.SUBMISSION.PENDING_REVIEW, {}, true);
-      if (res.data) {
+      
+      if (res.data && Array.isArray(res.data)) {
         this.setData({ poiList: res.data });
-        this.convertToMarkers(res.data, 'PENDING_REVIEW');
+        this.convertToMarkers(res.data);
+        console.log(`[Map] 待核验列表加载完成，共 ${res.data.length} 个POI`);
       }
     } catch (err) {
-      console.error('获取待核验列表失败:', err);
+      console.error('[Map] 获取待核验列表失败:', err);
+      wx.showToast({ title: '加载核验列表失败', icon: 'none' });
     }
   },
 
-  convertToMarkers(poiList, type) {
+  // ==================== 标记转换 ====================
+  convertToMarkers(poiList) {
     if (!poiList || poiList.length === 0) {
       this.setData({ markers: [] });
       return;
@@ -139,18 +283,17 @@ Page({
 
     const markers = poiList.map((poi, index) => {
       const markerType = this.getMarkerType(poi);
-      const config = MARKER_CONFIG[markerType] || MARKER_CONFIG.default;
-
-      return {
-        id: poi.id || index,
+      const iconPath = MARKER_ICONS[markerType] || MARKER_ICONS.default;
+      const size = MARKER_SIZES[markerType] || MARKER_SIZES.default;
+      const markerOptions = {
+        id: poi.id || poi.taskId || index,
         title: poi.name || poi.targetName || '未知地点',
-        latitude: poi.latitude || poi.targetLatitude || 30.574,
-        longitude: poi.longitude || poi.targetLongitude || 114.292,
-        iconPath: '/images/marker.png',
-        width: config.size,
-        height: config.size,
+        latitude: poi.latitude || poi.targetLatitude || this.data.latitude,
+        longitude: poi.longitude || poi.targetLongitude || this.data.longitude,
+        width: size,
+        height: size,
         callout: {
-          content: (poi.name || poi.targetName) + '\n' + this.getCategoryLabel(poi),
+          content: this.formatCallout(poi),
           color: '#333333',
           fontSize: 12,
           borderRadius: 8,
@@ -160,37 +303,134 @@ Page({
           textAlign: 'center'
         }
       };
+      
+      markerOptions.iconPath = iconPath;
+      
+      return markerOptions;
     });
 
     this.setData({ markers });
+    
     if (markers.length > 0) {
       this.adjustMapView(markers);
     }
   },
 
+  // 获取标记类型
   getMarkerType(poi) {
-    if (poi.priority === 'high' || poi.priority === 'HIGH') {
-      return 'HIGH_PRIORITY';
-    }
+    // 已完成状态 - 统一使用绿色
     if (poi.status === 'COMPLETED') {
       return 'COMPLETED';
     }
-    if (this.data.userRole === 'collector') {
-      return 'PENDING_COLLECTION';
+    
+    // 高优先级判定
+    if (poi.priority === 'high' || poi.priority === 'HIGH') {
+      return 'HIGH_PRIORITY';
     }
+    
+    // 采集者角色
+    if (this.data.userRole === 'collector') {
+      if (poi.status === 'PENDING_COLLECTION') {
+        return 'PENDING_COLLECTION';
+      }
+      if (poi.priority === 'low' || poi.priority === 'LOW') {
+        return 'LOW_PRIORITY';
+      }
+      return 'NORMAL_PRIORITY';
+    }
+    
+    // 核验者角色
     return 'PENDING_REVIEW';
   },
 
-  getCategoryLabel(poi) {
-    if (poi.categoryName) return poi.categoryName;
-    if (poi.category) return poi.category;
-    if (poi.priority) {
-      const priorityMap = { high: '高优先级', medium: '普通优先级', low: '低优先级' };
-      return priorityMap[poi.priority] || '待处理';
-    }
-    return '待处理';
+  // 格式化气泡信息 - 包含分类图标
+  formatCallout(poi) {
+    const name = poi.name || poi.targetName || '未知地点';
+    const status = this.getStatusLabel(poi);
+    return `${name}\n${status}`;
   },
 
+  // 获取分类图标emoji
+  getCategoryIcon(poi) {
+    const category = poi.category || poi.targetCategory || poi.categoryName;
+    const categoryInfo = CATEGORY_MARKER_ICONS[category];
+    return categoryInfo ? categoryInfo.icon : '';
+  },
+
+  // 获取分类标签
+  getCategoryLabel(poi) {
+    const category = poi.category || poi.targetCategory || poi.categoryName;
+    const categoryInfo = CATEGORY_MARKER_ICONS[category];
+    if (categoryInfo) {
+      return categoryInfo.icon + ' ' + categoryInfo.label;
+    }
+    return poi.categoryName || poi.category || '待处理';
+  },
+
+  // 获取状态标签 - 所有任务显示类别图标，已完成任务标记已完成
+  getStatusLabel(poi) {
+    const category = poi.category || poi.targetCategory || poi.categoryName;
+    const categoryInfo = CATEGORY_MARKER_ICONS[category];
+    
+    // 获取基础标签
+    let baseLabel = '';
+    if (categoryInfo) {
+      baseLabel = categoryInfo.icon + ' ' + categoryInfo.label;
+    } else if (poi.categoryName) {
+      baseLabel = poi.categoryName;
+    } else if (poi.priority) {
+      baseLabel = PRIORITY_LABELS[poi.priority] || '待处理';
+    } else {
+      baseLabel = '待处理';
+    }
+    
+    // 已完成状态追加标记
+    if (poi.status === 'COMPLETED') {
+      return baseLabel + ' ✓ 已完成';
+    }
+    
+    return baseLabel;
+  },
+
+  // 获取 POI 图片数量
+  getImageCount(poi) {
+    if (!poi) return 0;
+
+    if (Array.isArray(poi.images)) {
+      return poi.images.length;
+    }
+
+    if (Array.isArray(poi.photos)) {
+      return poi.photos.length;
+    }
+
+    return 0;
+  },
+
+  // 获取第一张图片 URL
+  getFirstImageUrl(poi) {
+    if (!poi) return '';
+
+    if (Array.isArray(poi.images) && poi.images.length > 0) {
+      const firstImage = poi.images[0];
+      return typeof firstImage === 'string'
+        ? firstImage
+        : (firstImage.imageUrl || firstImage.url || '');
+    }
+
+    if (Array.isArray(poi.photos) && poi.photos.length > 0) {
+      return poi.photos[0];
+    }
+
+    return '';
+  },
+
+  // 是否有图片
+  hasImages(poi) {
+    return this.getImageCount(poi) > 0;
+  },
+
+  // ==================== 地图视图调整 ====================
   adjustMapView(markers) {
     if (markers.length === 0) return;
 
@@ -235,6 +475,7 @@ Page({
     });
   },
 
+  // ==================== 定位功能 ====================
   getCurrentLocation() {
     if (this.data.isLocating) return;
 
@@ -270,6 +511,7 @@ Page({
     });
   },
 
+  // ==================== 搜索功能 ====================
   onKeywordInput(e) {
     const keyword = e.detail.value;
     this.setData({ keyword });
@@ -312,7 +554,7 @@ Page({
       },
       fail: (err) => {
         this.setData({ isSearching: false });
-        console.error('搜索建议失败:', err);
+        console.error('[Map] 搜索建议失败:', err);
       }
     });
   },
@@ -335,7 +577,7 @@ Page({
       title: item.title,
       latitude: item.location.lat,
       longitude: item.location.lng,
-      iconPath: '/images/marker.png',
+      iconPath: MARKER_ICONS.SEARCH_RESULT,
       width: 32,
       height: 32,
       callout: {
@@ -386,7 +628,7 @@ Page({
           title: item.title,
           latitude: item.location.lat,
           longitude: item.location.lng,
-          iconPath: '/images/marker.png',
+          iconPath: MARKER_ICONS.SEARCH_RESULT,
           width: 28,
           height: 28,
           callout: {
@@ -417,6 +659,7 @@ Page({
     });
   },
 
+  // ==================== 标记交互 ====================
   onMarkerTap(e) {
     const markerId = e.markerId;
     const markers = this.data.markers;
@@ -431,6 +674,7 @@ Page({
     this.setData({ selectedMarker: null });
   },
 
+  // ==================== 路径规划 ====================
   calculateRoute() {
     const { selectedMarker, cachedLocation, latitude, longitude } = this.data;
 
@@ -441,7 +685,6 @@ Page({
 
     wx.showLoading({ title: '规划路线中...' });
 
-    // 调用腾讯地图WebService API计算步行路线
     wx.request({
       url: 'https://apis.map.qq.com/ws/direction/v1/walking/',
       data: {
@@ -461,7 +704,6 @@ Page({
             ? (distance / 1000).toFixed(1) + '公里'
             : distance + '米';
           
-          // 步行速度约5km/h = 83.33米/分钟
           const durationMinutes = Math.ceil(distance / 83.33);
           const durationText = durationMinutes + '分钟';
 
@@ -479,23 +721,20 @@ Page({
             }
           });
 
-          // 调整地图视野并绘制路线
           this.drawRouteOnMap(userLat, userLng, selectedMarker.latitude, selectedMarker.longitude, routePoints);
         } else {
           wx.showToast({ title: '未找到可行路线', icon: 'none' });
-          console.log('路线规划响应:', res.data);
         }
       },
       fail: (err) => {
         wx.hideLoading();
-        console.error('路径规划失败:', err);
+        console.error('[Map] 路径规划失败:', err);
         wx.showToast({ title: '路线规划失败', icon: 'none' });
       }
     });
   },
 
   drawRouteOnMap(startLat, startLng, endLat, endLng, routePoints) {
-    // 计算中心点和缩放级别
     const centerLat = (startLat + endLat) / 2;
     const centerLng = (startLng + endLng) / 2;
     const latDiff = Math.abs(endLat - startLat);
@@ -544,6 +783,7 @@ Page({
     this.setData({ routeInfo: null });
   },
 
+  // ==================== 详情跳转 ====================
   goToDetail() {
     const { selectedMarker } = this.data;
     if (!selectedMarker) return;
@@ -566,6 +806,7 @@ Page({
     wx.navigateTo({ url });
   },
 
+  // ==================== 事件处理 ====================
   onRegionChange(e) {},
 
   onControltap(e) {

@@ -1,6 +1,7 @@
 // 登录/个人页面
 const { API } = require('../../config/api');
 const { Request } = require('../../config/request');
+const { getAvatarByUserInfo } = require('../../utils/avatar');
 const app = getApp();
 
 Page({
@@ -26,14 +27,13 @@ Page({
     const loginToken = wx.getStorageSync('loginToken');
     const nickname = wx.getStorageSync('userNickname');
     const userRole = wx.getStorageSync('userRole');
-    const avatar = wx.getStorageSync('userAvatar') || '/images/avatar.png';
     
     if (loginToken) {
       this.setData({
         userInfo: {
           logined: true,
           nickname: nickname || '用户',
-          avatar: avatar,
+          avatar: getAvatarByUserInfo({ role: userRole }),
           role: userRole || ''
         }
       });
@@ -105,7 +105,7 @@ Page({
             userInfo: {
               logined: true,
               nickname: res.data.nickname || '用户',
-              avatar: res.data.avatar || '/images/avatar.png',
+              avatar: getAvatarByUserInfo({ role: res.data.role }),
               role: res.data.role || ''
             }
           });
@@ -177,8 +177,9 @@ Page({
   },
 
   onAvatarError() {
+    const userRole = wx.getStorageSync('userRole');
     this.setData({
-      'userInfo.avatar': '/images/avatar.png'
+      'userInfo.avatar': getAvatarByUserInfo({ role: userRole })
     });
   }
 });

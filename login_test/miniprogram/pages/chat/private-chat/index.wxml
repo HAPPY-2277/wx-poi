@@ -1,5 +1,5 @@
 <view class="container">
-  <scroll-view class="message-list" scroll-y="true" scroll-top="{{scrollTop}}">
+  <scroll-view class="message-list" scroll-y="true" scroll-top="{{scrollTop}}" style="height: 921rpx; display: block; box-sizing: border-box">
     <view class="loading-tip" wx:if="{{loading}}">
       <text>加载中...</text>
     </view>
@@ -19,13 +19,15 @@
     </view>
   </scroll-view>
 
-  <view class="input-area" style="height: 117rpx; display: flex; box-sizing: border-box; left: 0rpx; top: 1405rpx">
-    <textarea style="height: 80rpx; display: block; box-sizing: border-box; left: 0rpx; top: 0rpx" class="message-input" 
+  <view class="input-area">
+    <input style="width: 423rpx; display: block; box-sizing: border-box" class="message-input" 
+      type="text"
       value="{{inputContent}}" 
       placeholder="输入消息..." 
       bindinput="onInputChange"
       adjust-position="true"
-      fixed="true"
+      confirm-type="send"
+      bindconfirm="sendMessage"
     />
     <button class="send-btn" bindtap="sendMessage" style="width: 260rpx; display: flex; box-sizing: border-box; left: 0rpx; top: 0rpx">
       <text>发送</text>

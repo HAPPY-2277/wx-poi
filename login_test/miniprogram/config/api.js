@@ -12,6 +12,14 @@ const MSG_BASE_URL = MSG_SERVER.BASE_URL;
 
 const TENCENT_MAP_KEY = THIRD_PARTY.TENCENT_MAP_KEY;
 
+// 图片上传配置常量
+const IMAGE_CONFIG = {
+  MAX_FILE_SIZE: 10 * 1024 * 1024,  // 单张图片最大 2MB
+  MAX_COUNT: 9,                      // 最多上传9张
+  ALLOWED_TYPES: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'],
+  UPLOAD_TIMEOUT: 30000              // 上传超时 30秒
+};
+
 const API = {
   AUTH: {
     LOGIN: `${API_BASE_URL}/api/auth/login`,
@@ -22,6 +30,9 @@ const API = {
     LIST: `${API_BASE_URL}/api/poi`,
     DETAIL: (id) => `${API_BASE_URL}/api/poi/${id}`,
     COLLECTOR_LIST: (collectorId) => `${API_BASE_URL}/api/poi/collector/${collectorId}`,
+    UPLOAD_IMAGES: (poiId) => `${API_BASE_URL}/api/poi/${poiId}/images`,
+    GET_IMAGES: (poiId) => `${API_BASE_URL}/api/poi/${poiId}/images`,
+    DELETE_IMAGE: (imageId) => `${API_BASE_URL}/api/poi/images/${imageId}`,
   },
 
   TASK: {
@@ -51,6 +62,9 @@ const API = {
     APPROVE: (id) => `${API_BASE_URL}/api/submission/${id}/approve`,
     REJECT: (id) => `${API_BASE_URL}/api/submission/${id}/reject`,
     RESUBMIT: `${API_BASE_URL}/api/submission/resubmit`,
+    UPLOAD_IMAGES: (submissionId) => `${API_BASE_URL}/api/submission/${submissionId}/images`,
+    GET_IMAGES: (submissionId) => `${API_BASE_URL}/api/submission/${submissionId}/images`,
+    DELETE_IMAGE: (imageId) => `${API_BASE_URL}/api/submission/images/${imageId}`,
   },
 
   MSG: {
@@ -73,5 +87,6 @@ module.exports = {
   API,
   API_BASE_URL,
   MSG_BASE_URL,
-  TENCENT_MAP_KEY
+  TENCENT_MAP_KEY,
+  IMAGE_CONFIG
 };

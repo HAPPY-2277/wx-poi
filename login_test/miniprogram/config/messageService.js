@@ -201,24 +201,43 @@ function getCachedMessages(type, targetId) {
  * @returns {Promise} 返回发送结果
  */
 async function sendMessage(params) {
+  console.log('[MessageService] sendMessage被调用，原始参数:', JSON.stringify(params));
+  
   const { msg_type, from_user_id, to_id, to_type, content, content_type = 'text', poi_id = null, extra = null } = params;
+  
+  console.log('[MessageService] 解构后的参数:', {
+    msg_type,
+    from_user_id,
+    to_id,
+    to_type,
+    content,
+    content_type,
+    poi_id,
+    extra
+  });
+  console.log('[MessageService] from_user_id类型:', typeof from_user_id, 'to_id类型:', typeof to_id);
 
   try {
+    const requestData = {
+      msg_type,
+      from_user_id,
+      to_id,
+      to_type,
+      content,
+      content_type,
+      poi_id,
+      extra
+    };
+    console.log('[MessageService] 实际发送的requestData:', JSON.stringify(requestData));
+    
     const res = await request({
       url: API.MSG.SEND,
       method: 'POST',
-      data: {
-        msg_type,
-        from_user_id,
-        to_id,
-        to_type,
-        content,
-        content_type,
-        poi_id,
-        extra
-      },
+      data: requestData,
       needAuth: false
     });
+
+    console.log('[MessageService] HTTP请求响应:', JSON.stringify(res));
 
     if (res.success) {
       const message = {
@@ -300,13 +319,20 @@ async function getPrivateHistory(user1, user2, limit = 50, offset = 0) {
       needAuth: false
     });
 
+    console.log('[MessageService] getPrivateHistory 返回:', res);
+    
     if (res.success) {
-      return { success: true, data: res.data || [] };
+      const data = res.data || [];
+      if (data.length > 0) {
+        data.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+      }
+      return { success: true, data };
     } else {
+      console.error('[MessageService] 获取私聊历史失败:', res);
       return { success: false, data: [] };
     }
   } catch (err) {
-    console.error('[MessageService] 获取私聊历史失败:', err);
+    console.error('[MessageService] 获取私聊历史异常:', err);
     return { success: false, data: [] };
   }
 }
@@ -326,13 +352,20 @@ async function getGroupHistory(groupId, limit = 50, offset = 0) {
       needAuth: false
     });
 
+    console.log('[MessageService] getGroupHistory 返回:', res);
+    
     if (res.success) {
-      return { success: true, data: res.data || [] };
+      const data = res.data || [];
+      if (data.length > 0) {
+        data.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+      }
+      return { success: true, data };
     } else {
+      console.error('[MessageService] 获取群聊历史失败:', res);
       return { success: false, data: [] };
     }
   } catch (err) {
-    console.error('[MessageService] 获取群聊历史失败:', err);
+    console.error('[MessageService] 获取群聊历史异常:', err);
     return { success: false, data: [] };
   }
 }
@@ -389,6 +422,18 @@ async function submitObjection(params) {
  */
 function request(options) {
   return new Promise((resolve, reject) => {
+    console.log('[MessageService] 发起请求:', {
+      url: options.url,
+      method: options.method,
+      data: options.data
+    });
+    console.log('[MessageService] wx.request发送的data详情:', JSON.stringify(options.data, (key, value) => {
+      if (typeof value === 'number' && Number.isNaN(value)) {
+        return 'NaN';
+      }
+      return value;
+    }, 2));
+    
     wx.request({
       url: options.url,
       method: options.method || 'GET',
@@ -397,12 +442,22 @@ function request(options) {
         'Content-Type': 'application/json'
       },
       success: (res) => {
+        console.log('[MessageService] 请求成功:', {
+          statusCode: res.statusCode,
+          data: res.data
+        });
         const response = res.data;
-        // 适配消息服务返回格式 { code, msg, data }
         const adapted = adaptMessageResponse(response);
         resolve(adapted);
       },
-      fail: (err) => reject(err)
+      fail: (err) => {
+        console.error('[MessageService] 请求失败:', {
+          err,
+          url: options.url,
+          method: options.method
+        });
+        reject(err);
+      }
     });
   });
 }
@@ -574,6 +629,15 @@ function checkConnection() {
  * 发送私聊消息
  */
 async function sendPrivateMessage(fromUserId, toUserId, content, poiId = null) {
+  console.log('[MessageService] sendPrivateMessage被调用，参数:', {
+    fromUserId,
+    toUserId,
+    content,
+    poiId,
+    fromUserId类型: typeof fromUserId,
+    toUserId类型: typeof toUserId
+  });
+  
   return sendMessage({
     msg_type: 'private',
     from_user_id: fromUserId,

@@ -4,6 +4,56 @@
 
 const MOCK_USER_ID = 'mock_user_' + Date.now();
 
+// Mock 图片数据 - POISubmissionImageResponse
+const MOCK_SUBMISSION_IMAGES = [
+  {
+    id: 'img_sub_001',
+    submissionId: 'sub_001',
+    imageUrl: 'https://picsum.photos/800/600?random=1',
+    sortOrder: 1,
+    createdAt: '2024-01-15T10:30:00+08:00'
+  },
+  {
+    id: 'img_sub_002',
+    submissionId: 'sub_001',
+    imageUrl: 'https://picsum.photos/800/600?random=2',
+    sortOrder: 2,
+    createdAt: '2024-01-15T10:30:05+08:00'
+  },
+  {
+    id: 'img_sub_003',
+    submissionId: 'sub_001',
+    imageUrl: 'https://picsum.photos/800/600?random=3',
+    sortOrder: 3,
+    createdAt: '2024-01-15T10:30:10+08:00'
+  }
+];
+
+// Mock 图片数据 - PoiImageResponse
+const MOCK_POI_IMAGES = [
+  {
+    id: 'img_poi_001',
+    poiId: 'poi_001',
+    imageUrl: 'https://picsum.photos/800/600?random=10',
+    sortOrder: 1,
+    createdAt: '2024-01-10T10:00:00+08:00'
+  },
+  {
+    id: 'img_poi_002',
+    poiId: 'poi_001',
+    imageUrl: 'https://picsum.photos/800/600?random=11',
+    sortOrder: 2,
+    createdAt: '2024-01-10T10:00:05+08:00'
+  },
+  {
+    id: 'img_poi_003',
+    poiId: 'poi_002',
+    imageUrl: 'https://picsum.photos/800/600?random=12',
+    sortOrder: 1,
+    createdAt: '2024-01-12T14:00:00+08:00'
+  }
+];
+
 const MOCK_POI_LIST = [
   {
     id: 'poi_001',
@@ -15,7 +65,8 @@ const MOCK_POI_LIST = [
     address: '武汉市江汉区建设大道568号',
     collectorId: MOCK_USER_ID,
     createdAt: '2024-01-10T10:00:00+08:00',
-    updatedAt: '2024-01-10T10:00:00+08:00'
+    updatedAt: '2024-01-10T10:00:00+08:00',
+    images: [MOCK_POI_IMAGES[0], MOCK_POI_IMAGES[1]]
   },
   {
     id: 'poi_002',
@@ -27,7 +78,8 @@ const MOCK_POI_LIST = [
     address: '武汉市武昌区中南路7号',
     collectorId: MOCK_USER_ID,
     createdAt: '2024-01-12T14:00:00+08:00',
-    updatedAt: '2024-01-12T14:00:00+08:00'
+    updatedAt: '2024-01-12T14:00:00+08:00',
+    images: [MOCK_POI_IMAGES[2]]
   }
 ];
 
@@ -86,11 +138,7 @@ const MOCK_SUBMISSION_LIST = [
     createdAt: '2024-01-15T10:30:00+08:00',
     updatedAt: '2024-01-15T10:30:00+08:00',
     taskId: 'task_001',
-    photos: [
-      'https://picsum.photos/800/600?random=1',
-      'https://picsum.photos/800/600?random=2',
-      'https://picsum.photos/800/600?random=3'
-    ]
+    images: [MOCK_SUBMISSION_IMAGES[0], MOCK_SUBMISSION_IMAGES[1], MOCK_SUBMISSION_IMAGES[2]]
   },
   {
     id: 'sub_002',
@@ -111,16 +159,15 @@ const MOCK_SUBMISSION_LIST = [
     createdAt: '2024-01-14T14:00:00+08:00',
     updatedAt: '2024-01-14T18:00:00+08:00',
     taskId: 'task_002',
-    photos: [
-      'https://picsum.photos/800/600?random=4',
-      'https://picsum.photos/800/600?random=5'
-    ]
+    images: []
   }
 ];
 
 module.exports = {
   MOCK_ENABLED: false,
   MOCK_USER_ID,
+  MOCK_SUBMISSION_IMAGES,
+  MOCK_POI_IMAGES,
 
   RESPONSES: {
     '/api/auth/login': (data) => {
@@ -336,6 +383,34 @@ module.exports = {
         message: '提交不存在',
         data: null
       };
+    },
+
+    '/api/submission/*/images': {
+      success: true,
+      code: 200,
+      message: '获取成功',
+      data: MOCK_SUBMISSION_IMAGES
+    },
+
+    '/api/poi/*/images': {
+      success: true,
+      code: 200,
+      message: '获取成功',
+      data: MOCK_POI_IMAGES
+    },
+
+    '/api/submission/images/*': {
+      success: true,
+      code: 200,
+      message: '删除成功',
+      data: null
+    },
+
+    '/api/poi/images/*': {
+      success: true,
+      code: 200,
+      message: '删除成功',
+      data: null
     }
   },
 

@@ -88,8 +88,7 @@
   </view>
 
   <!-- 空状态 -->
-  <view class="empty-state" wx:if="{{!isLoading && reviewList.length === 0}}">
-    <text class="empty-icon">📋</text>
+  <view class="empty-state" wx:if="{{!isLoading && reviewList.length === 0}}" style="position: relative; left: 1rpx; top: -743rpx">
     <text class="empty-text">暂无审核记录</text>
     <text class="empty-hint">快去审核POI数据吧</text>
   </view>

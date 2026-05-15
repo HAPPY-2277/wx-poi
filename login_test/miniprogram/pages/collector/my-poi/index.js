@@ -66,18 +66,19 @@ Page({
 
     try {
       const res = await Request.get(API.POI.COLLECTOR_LIST(userId), {}, true);
-      let poiList = res.data || [];
-
-      if (this.data.filterStatus !== 'all') {
-        poiList = poiList.filter(p => p.status === this.data.filterStatus);
-      }
+      const allPOIList = res.data || [];
 
       const stats = {
-        total: poiList.length,
-        approved: poiList.filter(p => p.status === 'APPROVED').length,
-        pending: poiList.filter(p => p.status === 'PENDING_REVIEW').length,
-        rejected: poiList.filter(p => p.status === 'REJECTED').length
+        total: allPOIList.length,
+        approved: allPOIList.filter(p => p.status === 'APPROVED').length,
+        pending: allPOIList.filter(p => p.status === 'PENDING_REVIEW').length,
+        rejected: allPOIList.filter(p => p.status === 'REJECTED').length
       };
+
+      let poiList = allPOIList;
+      if (this.data.filterStatus !== 'all') {
+        poiList = allPOIList.filter(p => p.status === this.data.filterStatus);
+      }
 
       this.setData({
         poiList,

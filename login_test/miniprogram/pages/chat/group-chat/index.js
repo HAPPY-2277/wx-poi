@@ -2,12 +2,6 @@
 // 功能：采集者群、核验者群的群聊功能
 const messageService = require('../../../config/messageService');
 
-// 消息已读状态常量
-const MSG_READ_STATUS = {
-  UNREAD: 0,
-  READ: 1
-};
-
 Page({
   data: {
     groupId: null,
@@ -28,9 +22,9 @@ Page({
     const { groupId, groupName } = options;
     if (groupId) {
       this.setData({
-        groupId: parseInt(groupId),
+        groupId: parseInt(groupId) || groupId,
         groupName: groupName || '群聊',
-        myUserId: parseInt(wx.getStorageSync('userId') || '0'),
+        myUserId: wx.getStorageSync('userId'),
         myNickname: wx.getStorageSync('userNickname') || '我'
       });
       this.loadHistory();
@@ -82,7 +76,7 @@ Page({
 
   markMessagesAsRead(messages) {
     const unreadUuids = messages
-      .filter(m => m.is_read === MSG_READ_STATUS.UNREAD && m.from_user_id !== this.data.myUserId)
+      .filter(m => m.is_read === 0 && m.from_user_id !== this.data.myUserId)
       .map(m => m.msg_uuid);
 
     if (unreadUuids.length > 0) {
@@ -131,7 +125,7 @@ Page({
         to_type: 'group',
         content: content,
         content_type: 'text',
-        is_read: MSG_READ_STATUS.READ,
+        is_read: 1,
         created_at: new Date().toISOString()
       };
       this.setData({

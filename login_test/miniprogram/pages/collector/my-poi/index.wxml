@@ -25,8 +25,6 @@
     <view class="filter-item {{filterStatus === 'all' ? 'active' : ''}}" bindtap="onFilterChange" data-status="all">全部</view>
     <view class="filter-item {{filterStatus === 'pending' ? 'active' : ''}}" bindtap="onFilterChange" data-status="pending">待审核</view>
     <view class="filter-item {{filterStatus === 'approved' ? 'active' : ''}}" bindtap="onFilterChange" data-status="approved">已通过</view>
-    <view class="filter-item {{filterStatus === 'rejected' ? 'active' : ''}}" bindtap="onFilterChange" data-status="rejected">已拒绝</view>
-    <view class="filter-item {{filterStatus === 'draft' ? 'active' : ''}}" bindtap="onFilterChange" data-status="draft">草稿</view>
   </view>
 
   <view class="poi-list">

@@ -20,15 +20,17 @@
     </view>
   </scroll-view>
 
-  <view class="input-area" style="height: 127rpx; display: flex; box-sizing: border-box; left: 0rpx; top: 1323rpx">
-    <textarea style="height: 60rpx; display: block; box-sizing: border-box; left: 2rpx; top: -5rpx; width: 410rpx; position: relative" class="message-input" 
+  <view class="input-area">
+    <input class="message-input" 
+      type="text"
       value="{{inputContent}}" 
       placeholder="输入群消息..." 
       bindinput="onInputChange"
       adjust-position="true"
-      fixed="true"
+      confirm-type="send"
+      bindconfirm="sendMessage"
     />
-    <button class="send-btn" bindtap="sendMessage" style="position: relative; left: 2rpx; top: 0rpx; width: 260rpx; display: flex; box-sizing: border-box">
+    <button class="send-btn" bindtap="sendMessage" style="width: 260rpx; display: flex; box-sizing: border-box; left: 0rpx; top: 0rpx">
       <text>发送</text>
     </button>
   </view>

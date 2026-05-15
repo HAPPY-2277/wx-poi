@@ -1,7 +1,7 @@
 // 统一请求工具类
 // 基于 API 文档的返回结构处理
 
-const { API } = require('./api');
+const { API, IMAGE_CONFIG } = require('./api');
 const { MOCK_ENABLED, RESPONSES } = require('./mock');
 
 /**
@@ -278,6 +278,218 @@ const Request = {
 
   register(params) {
     return this.post(API.AUTH.REGISTER, params, false);
+  },
+
+  /**
+   * Base64方式上传单张图片
+   * @param {string} url 上传地址
+   * @param {Object} imageData 图片数据 { filePath, filename, contentType }
+   * @returns {Promise<Object>} 上传结果
+   */
+  uploadSingleImageByBase64(url, imageData) {
+    return new Promise((resolve, reject) => {
+      const { filePath, filename, contentType } = imageData;
+      const loginToken = wx.getStorageSync('loginToken');
+      const header = {
+        'Content-Type': 'application/json',
+        'Authorization': loginToken ? 'Bearer ' + loginToken : ''
+      };
+
+      // 读取文件为Base64
+      const fileManager = wx.getFileSystemManager();
+      fileManager.readFile({
+        filePath: filePath,
+        encoding: 'base64',
+        success: (res) => {
+          const base64Data = res.data;
+          const base64WithPrefix = `data:${contentType};base64,${base64Data}`;
+
+          console.log('[Base64上传] 开始上传图片:');
+          console.log('[Base64上传] URL:', url);
+          console.log('[Base64上传] 文件名:', filename);
+          console.log('[Base64上传] 内容类型:', contentType);
+          console.log('[Base64上传] Base64数据长度:', base64Data.length);
+          console.log('[Base64上传] Base64总长度:', base64WithPrefix.length);
+
+          wx.request({
+            url: url,
+            method: 'POST',
+            data: {
+              images: [{
+                filename: filename,
+                contentType: contentType,
+                base64Data: base64WithPrefix
+              }]
+            },
+            header: header,
+            timeout: IMAGE_CONFIG.UPLOAD_TIMEOUT,
+            success: (res) => {
+              console.log('[Base64上传] HTTP响应状态:', res.statusCode);
+              console.log('[Base64上传] 请求数据:', JSON.stringify({
+                images: [{
+                  filename: filename,
+                  contentType: contentType,
+                  base64Data: base64WithPrefix.substring(0, 50) + '...'
+                }]
+              }));
+              console.log('[Base64上传] 响应数据:', res.data);
+
+              const response = res.data;
+              const adaptedResponse = this.adaptResponse(response);
+
+              if (adaptedResponse.success) {
+                console.log('[Base64上传] 上传成功');
+                resolve(adaptedResponse);
+              } else {
+                const errorMsg = parseErrorMessage(adaptedResponse, null);
+                console.error('[Base64上传] 上传失败:', errorMsg);
+                reject({
+                  success: false,
+                  code: adaptedResponse.code || 500,
+                  message: errorMsg || '图片上传失败',
+                  filePath: filePath
+                });
+              }
+            },
+            fail: (err) => {
+              console.error('[Base64上传] 请求失败:', err);
+              console.error('[Base64上传] 错误信息:', err.errMsg);
+              reject({
+                success: false,
+                code: 500,
+                message: err.errMsg || '图片上传失败',
+                filePath: filePath,
+                error: err
+              });
+            }
+          });
+        },
+        fail: (err) => {
+          console.error('[Base64上传] 读取文件失败:', err);
+          console.error('[Base64上传] 文件路径:', filePath);
+          reject({
+            success: false,
+            code: 500,
+            message: '读取图片文件失败',
+            filePath: filePath,
+            error: err
+          });
+        }
+      });
+    });
+  },
+
+  /**
+   * 根据文件扩展名获取MIME类型
+   * @param {string} filename 文件名
+   * @returns {string} MIME类型
+   */
+  getContentType(filename) {
+    const ext = filename.split('.').pop().toLowerCase();
+    const mimeTypes = {
+      'jpg': 'image/jpeg',
+      'jpeg': 'image/jpeg',
+      'png': 'image/png',
+      'gif': 'image/gif',
+      'webp': 'image/webp'
+    };
+    return mimeTypes[ext] || 'image/jpeg';
+  },
+
+  /**
+   * 从文件路径提取文件名
+   * @param {string} filePath 文件路径
+   * @returns {string} 文件名
+   */
+  getFilenameFromPath(filePath) {
+    const parts = filePath.split('/');
+    return parts[parts.length - 1] || 'image.jpg';
+  },
+
+  /**
+   * Base64方式批量上传图片
+   * @param {string} url 上传地址
+   * @param {Array<string>} filePaths 文件路径数组
+   * @param {Function} onProgress 进度回调 (completed, total)
+   * @returns {Promise<Object>} 上传结果 { success, uploadedImages, failedImages }
+   */
+  async uploadImagesByBase64(url, filePaths, onProgress) {
+    console.log('\n╔═══════════════════════════════════════════════════════╗');
+    console.log('║ 【Base64上传】uploadImagesByBase64() 进入              ║');
+    console.log('╚═══════════════════════════════════════════════════════╝');
+    console.log('  ├── URL:', url);
+    console.log('  ├── 文件数量:', filePaths.length);
+    console.log('  ├── 文件列表:', filePaths);
+
+    const total = filePaths.length;
+    const uploadedImages = [];
+    const failedImages = [];
+
+    console.log('\n  [开始逐个上传图片]');
+
+    for (let i = 0; i < filePaths.length; i++) {
+      const filePath = filePaths[i];
+      const filename = this.getFilenameFromPath(filePath);
+      const contentType = this.getContentType(filename);
+
+      console.log(`\n  ┌──────────────────────────────────────┐`);
+      console.log(`  │ 第 ${i + 1}/${total} 张图片上传中...`);
+      console.log(`  └──────────────────────────────────────┘`);
+      console.log(`      文件路径: ${filePath}`);
+      console.log(`      文件名: ${filename}`);
+      console.log(`      内容类型: ${contentType}`);
+
+      try {
+        console.log(`      [调用] uploadSingleImageByBase64()`);
+        const result = await this.uploadSingleImageByBase64(url, {
+          filePath,
+          filename,
+          contentType
+        });
+
+        if (result.success && result.data) {
+          console.log(`      [成功] 图片上传完成`);
+          uploadedImages.push({
+            ...result.data,
+            localPath: filePath
+          });
+        } else {
+          console.log(`      [失败] 图片上传失败: ${result.message}`);
+          failedImages.push({
+            filePath: filePath,
+            error: result.message
+          });
+        }
+      } catch (err) {
+        console.error(`      [异常] 上传出错: ${err.message || err}`);
+        failedImages.push({
+          filePath: filePath,
+          error: err.message || '上传失败'
+        });
+      }
+
+      if (onProgress) {
+        console.log(`      [回调] 通知进度: ${i + 1}/${total}`);
+        onProgress(i + 1, total);
+      }
+    }
+
+    console.log('\n╔═══════════════════════════════════════════════════════╗');
+    console.log('║ 【Base64上传】uploadImagesByBase64() 完成              ║');
+    console.log('╚═══════════════════════════════════════════════════════╝');
+    console.log('  ├── 成功:', uploadedImages.length, '张');
+    console.log('  ├── 失败:', failedImages.length, '张');
+    console.log('  ├── 总计:', total, '张');
+    console.log('  └── 整体状态:', failedImages.length === 0 ? '✅ 全部成功' : '⚠️ 部分失败');
+
+    return {
+      success: failedImages.length === 0,
+      uploadedImages,
+      failedImages,
+      totalCount: total,
+      successCount: uploadedImages.length,
+      failedCount: failedImages.length
+    };
   }
 };
 

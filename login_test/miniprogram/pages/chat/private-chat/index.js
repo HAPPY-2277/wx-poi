@@ -1,18 +1,14 @@
 // 私聊页面
 // 功能：采集者与核验者私聊讨论
 const messageService = require('../../../config/messageService');
-
-// 消息已读状态常量
-const MSG_READ_STATUS = {
-  UNREAD: 0,
-  READ: 1
-};
+const { getAvatarByUserInfo } = require('../../../utils/avatar');
 
 Page({
   data: {
     userId: null,
     targetId: null,
     targetName: '',
+    targetRole: '',
     messages: [],
     inputContent: '',
     loading: true,
@@ -20,20 +16,32 @@ Page({
     pageSize: 20,
     hasMore: true,
     myUserId: null,
+    myRole: '',
     scrollTop: 0,
     _messageListener: null
   },
 
   onLoad(options) {
-    const { userId } = options;
+    console.log('[私聊页面] onLoad options:', JSON.stringify(options));
+    console.log('[私聊页面] storage中的userId:', wx.getStorageSync('userId'));
+    console.log('[私聊页面] storage中的userRole:', wx.getStorageSync('userRole'));
+    
+    const { userId, nickname, role } = options;
     if (userId) {
+      console.log('[私聊页面] URL参数 userId:', userId, '类型:', typeof userId);
+      
       this.setData({
-        targetId: parseInt(userId),
-        targetName: `用户 ${userId}`,
-        myUserId: parseInt(wx.getStorageSync('userId') || '0')
+        targetId: userId,
+        targetName: nickname ? decodeURIComponent(nickname) : `用户 ${userId}`,
+        targetRole: role || 'unknown',
+        myUserId: wx.getStorageSync('userId'),
+        myRole: wx.getStorageSync('userRole') || ''
       });
+      console.log('[私聊页面] setData后的targetId:', this.data.targetId, 'myUserId:', this.data.myUserId);
       this.loadHistory();
       this.setupMessageListener();
+    } else {
+      console.log('[私聊页面] 错误：userId参数为空');
     }
   },
 
@@ -82,7 +90,7 @@ Page({
 
   markMessagesAsRead(messages) {
     const unreadUuids = messages
-      .filter(m => m.is_read === MSG_READ_STATUS.UNREAD && m.from_user_id !== this.data.myUserId)
+      .filter(m => m.is_read === 0 && m.from_user_id !== this.data.myUserId)
       .map(m => m.msg_uuid);
 
     if (unreadUuids.length > 0) {
@@ -116,15 +124,33 @@ Page({
 
   async sendMessage() {
     const content = this.data.inputContent.trim();
-    if (!content || !this.data.targetId) return;
+    console.log('[私聊页面] sendMessage调用');
+    console.log('[私聊页面] inputContent:', content);
+    console.log('[私聊页面] targetId:', this.data.targetId);
+    console.log('[私聊页面] myUserId:', this.data.myUserId);
+    console.log('[私聊页面] targetId是否为NaN:', Number.isNaN(this.data.targetId));
+    console.log('[私聊页面] myUserId是否为NaN:', Number.isNaN(this.data.myUserId));
+    
+    if (!content || !this.data.targetId) {
+      console.log('[私聊页面] 发送失败：内容或targetId为空');
+      return;
+    }
 
     this.setData({ inputContent: '' });
+
+    console.log('[私聊页面] 调用messageService.sendPrivateMessage，参数:', {
+      fromUserId: this.data.myUserId,
+      toUserId: this.data.targetId,
+      content: content
+    });
 
     const res = await messageService.sendPrivateMessage(
       this.data.myUserId,
       this.data.targetId,
       content
     );
+
+    console.log('[私聊页面] sendPrivateMessage返回结果:', JSON.stringify(res));
 
     if (res.success) {
       const newMessage = {
@@ -135,7 +161,7 @@ Page({
         to_type: 'user',
         content: content,
         content_type: 'text',
-        is_read: MSG_READ_STATUS.READ,
+        is_read: 1,
         created_at: new Date().toISOString()
       };
       this.setData({
@@ -163,5 +189,9 @@ Page({
     if (this.data._messageListener) {
       messageService.removeMessageListener(this.data._messageListener);
     }
+  },
+
+  getAvatar(role) {
+    return getAvatarByUserInfo({ role: role || 'unknown' });
   }
 });

@@ -3,6 +3,10 @@
 
 const { API } = require('../../../config/api');
 const { Request } = require('../../../config/request');
+const { ImageService } = require('../../../config/imageService');
+const { SERVER } = require('../../../config/config');
+
+const IMAGE_BASE_URL = SERVER.BASE_URL;
 
 // 任务分类枚举（与API规范保持一致）
 const CATEGORIES = [
@@ -58,6 +62,12 @@ Page({
     try {
       const res = await Request.get(API.SUBMISSION.PENDING_REVIEW, {}, true);
       let list = res.data || [];
+
+      // 预处理图片 URL
+      list = list.map(item => ({
+        ...item,
+        _firstImageUrl: this.getFirstImageUrl(item)
+      }));
 
       // 应用分类筛选
       if (this.data.filters.category !== 'all') {
@@ -146,6 +156,58 @@ Page({
 
   getCategoryName(category) {
     return CATEGORY_MAP[category] || category;
+  },
+
+  getFullImageUrl(url) {
+    if (!url) return '';
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+    return IMAGE_BASE_URL + url;
+  },
+
+  getFirstImageUrl(item) {
+    if (!item) return '';
+
+    if (Array.isArray(item.images) && item.images.length > 0) {
+      const firstImage = item.images[0];
+      const url = typeof firstImage === 'string' ? firstImage : (firstImage.imageUrl || firstImage.url || '');
+      return this.getFullImageUrl(url);
+    }
+
+    if (Array.isArray(item.photos) && item.photos.length > 0) {
+      return this.getFullImageUrl(item.photos[0]);
+    }
+
+    return '';
+  },
+
+  hasImages(item) {
+    if (!item) return false;
+
+    if (Array.isArray(item.images) && item.images.length > 0) {
+      return true;
+    }
+
+    if (Array.isArray(item.photos) && item.photos.length > 0) {
+      return true;
+    }
+
+    return false;
+  },
+
+  getImageCount(item) {
+    if (!item) return 0;
+
+    if (Array.isArray(item.images)) {
+      return item.images.length;
+    }
+
+    if (Array.isArray(item.photos)) {
+      return item.photos.length;
+    }
+
+    return 0;
   },
 
   formatTime(timestamp) {
